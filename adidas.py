@@ -22,16 +22,16 @@ ssl._create_default_https_context = ssl._create_stdlib_context
 
 urls = [
     "https://www.adidas.com.cn/men_hats&gloves&scarves?t=headwear&sex=men",
-    "https://www.adidas.com.cn/men_sweats_clothing?t=fleece&sex=men",
-    "https://www.adidas.com.cn/men_jacketsandtracktops_clothing?t=jacket&sex=men",
-    "https://www.adidas.com.cn/search?t=tshirts&sex=men&ni=374&pf=25-40%2C%2C25-40%2C&pr=-&fo=p25%2Cp25&pn=1&pageSize=120&p=undefined-%E7%94%B7%E5%AD%90%26undefined-%E7%94%B7%E5%AD%90&isSaleTop=false",
-    "https://www.adidas.com.cn/men_bags?t=bag&sex=men",
+    # "https://www.adidas.com.cn/men_sweats_clothing?t=fleece&sex=men",
+    # "https://www.adidas.com.cn/men_jacketsandtracktops_clothing?t=jacket&sex=men",
+    # "https://www.adidas.com.cn/search?t=tshirts&sex=men&ni=374&pf=25-40%2C%2C25-40%2C&pr=-&fo=p25%2Cp25&pn=1&pageSize=120&p=undefined-%E7%94%B7%E5%AD%90%26undefined-%E7%94%B7%E5%AD%90&isSaleTop=false",
+    # "https://www.adidas.com.cn/men_bags?t=bag&sex=men",
     "https://www.adidas.com.cn/women_hats&gloves&scarves?t=headwear&sex=women",
-    "https://www.adidas.com.cn/women_sweats_clothing?t=fleece&sex=women",
-    "https://www.adidas.com.cn/women_jacketsandtracktops_clothing?t=jacket&sex=women",
-    "https://www.adidas.com.cn/women_bras_clothing_segment?t=bra&sex=women",
-    "https://www.adidas.com.cn/search?t=tshirts&sex=women&ni=377&pf=25-82%2C%2C25-82%2C&pr=-&fo=p25%2Cp25&pn=1&pageSize=120&p=undefined-%E5%A5%B3%E5%AD%90%26undefined-%E5%A5%B3%E5%AD%90&isSaleTop=false",
-    "https://www.adidas.com.cn/women_bags?t=bag&sex=women",
+    # "https://www.adidas.com.cn/women_sweats_clothing?t=fleece&sex=women",
+    # "https://www.adidas.com.cn/women_jacketsandtracktops_clothing?t=jacket&sex=women",
+    # "https://www.adidas.com.cn/women_bras_clothing_segment?t=bra&sex=women",
+    # "https://www.adidas.com.cn/search?t=tshirts&sex=women&ni=377&pf=25-82%2C%2C25-82%2C&pr=-&fo=p25%2Cp25&pn=1&pageSize=120&p=undefined-%E5%A5%B3%E5%AD%90%26undefined-%E5%A5%B3%E5%AD%90&isSaleTop=false",
+    # "https://www.adidas.com.cn/women_bags?t=bag&sex=women",
 ]
 
 
@@ -120,22 +120,22 @@ def exit_ten(driver,urls_len,url,u_len,goods_gender,goods_page):
             #产品页面编号
             goods_page = goods_page
 
-            # writer.writerow((
-            #     goods_name,
-            #     goods_model,
-            #     goods_price,
-            #     goods_discount_price,
-            #     goods_color,
-            #     goods_sizes,
-            #     goods_details,
-            #     goods_images,
-            #     goods_title,
-            #     goods_order,
-            #     gender,
-            #     goods_page,
-            #     goods_comments,
-            #     goods_url,
-            # ))
+            writer.writerow((
+                goods_name,
+                goods_model,
+                goods_price,
+                goods_discount_price,
+                goods_color,
+                goods_sizes,
+                goods_details,
+                goods_images,
+                goods_title,
+                goods_order,
+                gender,
+                goods_page,
+                goods_comments,
+                "https://www.adidas.com.cn{}".format(goods_url.strip()),
+            ))
 
     if "search?" in url and len(goods_urls) != 0:
         url_sp = url.split("pn=")

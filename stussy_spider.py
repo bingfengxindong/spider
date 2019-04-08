@@ -31,16 +31,16 @@ writer.writerow(("goods_name","goods_model","goods_price","goods_discount_price"
 ssl._create_default_https_context = ssl._create_stdlib_context
 #主url
 urls = [
-    "https://www.stussy.com/us/mens/tees",
-    "https://www.stussy.com/us/mens/long-sleeve-tees",
-    "https://www.stussy.com/us/mens/shirts",
-    "https://www.stussy.com/us/mens/hoodies-sweaters",
-    "https://www.stussy.com/us/mens/jackets",
-    "https://www.stussy.com/us/womens/tees",
-    "https://www.stussy.com/us/womens/shirts",
-    "https://www.stussy.com/us/womens/hoodies-sweaters",
-    "https://www.stussy.com/us/womens/jackets",
-    "https://www.stussy.com/us/womens/dresses",
+    # "https://www.stussy.com/us/mens/tees",
+    # "https://www.stussy.com/us/mens/long-sleeve-tees",
+    # "https://www.stussy.com/us/mens/shirts",
+    # "https://www.stussy.com/us/mens/hoodies-sweaters",
+    # "https://www.stussy.com/us/mens/jackets",
+    # "https://www.stussy.com/us/womens/tees",
+    # "https://www.stussy.com/us/womens/shirts",
+    # "https://www.stussy.com/us/womens/hoodies-sweaters",
+    # "https://www.stussy.com/us/womens/jackets",
+    # "https://www.stussy.com/us/womens/dresses",
     "https://www.stussy.com/us/accessories/hats-beanies",
 ]
 headers = {

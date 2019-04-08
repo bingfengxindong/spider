@@ -4,8 +4,8 @@ import scrapy
 class HerschelSpider(scrapy.Spider):
     name = "herschel"
     start_urls = [
-        "https://herschel.com/shop/mens/headwear",
-        "https://herschel.com/shop/womens/headwear",
+        # "https://herschel.com/shop/mens/headwear",
+        # "https://herschel.com/shop/womens/headwear",
         "https://herschel.com/shop/kids/headwear",
     ]
     headers = {

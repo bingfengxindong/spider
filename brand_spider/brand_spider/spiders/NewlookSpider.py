@@ -20,7 +20,7 @@ class NewlookSpider(scrapy.Spider):
         for start_url in self.start_urls:
             yield scrapy.Request(url=start_url,callback=self.parse,headers=self.headers,meta={"url":start_url,
                                                                                               "goods_page":self.start_urls.index(start_url) + 1,
-                                                                                              "proxy": "https://123.1.150.244:80",
+                                                                                              # "proxy": "https://123.1.150.244:80",
                                                                                               })
 
     def parse(self, response):
@@ -35,7 +35,8 @@ class NewlookSpider(scrapy.Spider):
                                  headers=self.headers,
                                  meta={"goods_page":goods_page,
                                        "goods_gender":goods_gender,
-                                       "page":i,"proxy":"https://123.1.150.244:80",
+                                       "page":i,
+                                       # "proxy":"https://123.1.150.244:80",
                                        })
 
     def json_parse(self,response):
@@ -70,7 +71,7 @@ class NewlookSpider(scrapy.Spider):
                                            "goods_gender":goods_gender,
                                            "goods_page":goods_page,
                                            "goods_url":goods_url,
-                                           "proxy":"https://123.1.150.244:80",
+                                           # "proxy":"https://123.1.150.244:80",
                                            })
 
     def json_image_parse(self,response):
@@ -103,7 +104,7 @@ class NewlookSpider(scrapy.Spider):
                                    "goods_gender": goods_gender,
                                    "goods_page": goods_page,
                                    "goods_url": goods_url,
-                                   "proxy": "https://123.1.150.244:80",
+                                   # "proxy": "https://123.1.150.244:80",
                                    })
 
     def json_description_json(self,response):
