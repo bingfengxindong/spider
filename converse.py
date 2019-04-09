@@ -1,5 +1,6 @@
 from lxml import etree
 from selenium import webdriver
+from fake_useragent import UserAgent
 from selenium.webdriver import ActionChains
 from selenium.common.exceptions import NoSuchElementException
 
@@ -14,33 +15,15 @@ import datetime
 path = os.path.join(".","goods_info",datetime.datetime.now().strftime("%Y-%m-%d"))
 if not os.path.exists(path):
     os.makedirs(path)
-file = open(os.path.join(".","goods_info",datetime.datetime.now().strftime("%Y-%m-%d"),"thenorthface.csv"),"w+",encoding="utf-8",newline="")
+file = open(os.path.join(".","goods_info",datetime.datetime.now().strftime("%Y-%m-%d"),"converse.csv"),"w+",encoding="utf-8",newline="")
 writer = csv.writer(file)
-writer.writerow(("goods_name","goods_model","goods_price","goods_discount_price","goods_color","goods_size","goods_details","goods_images","goods_title","goods_num","gender","goods_page","goods_comments","goods_url"))
+writer.writerow(("goods_name","goods_model","goods_price","goods_discount_price","goods_color","goods_size","goods_details","goods_images","goods_num","gender","goods_page","goods_url"))
 
 ssl._create_default_https_context = ssl._create_stdlib_context
 
 urls = [
     "https://www.converse.com.cn/men-accessories/category.htm?attributeParams=&propertyCode=cap&size=&maxprice=&minprice=&sort=showOrder&rowsNum=&isPaging=false&pageNo=1",
     "https://www.converse.com.cn/women-accessories/category.htm?attributeParams=&propertyCode=cap&size=&maxprice=&minprice=&sort=showOrder&rowsNum=&isPaging=false&pageNo=1",
-]
-
-
-# headers = {
-#     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-#     'Accept-Encoding': 'gzip, deflate, br',
-#     'Accept-Language': 'zh-CN,zh;q=0.9',
-#     'Upgrade-Insecure-sRequests': '1',
-#     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36',
-# }
-
-headers_list = [
-    {"User-Agent":"User-Agent:Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; en-us) AppleWebKit/534.50 (KHTML, like Gecko) Version/5.1 Safari/534.50"},
-    {"User-Agent":"User-Agent:Mozilla/5.0 (Windows; U; Windows NT 6.1; en-us) AppleWebKit/534.50 (KHTML, like Gecko) Version/5.1 Safari/534.50"},
-    {"User-Agent":"User-Agent:Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0"},
-    {"User-Agent":"User-Agent:Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0)"},
-    {"User-Agent":"User-Agent:Mozilla/5.0 (Windows NT 6.1; rv:2.0.1) Gecko/20100101 Firefox/4.0.1"},
-    {"User-Agent":"User-Agent: Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Trident/4.0; SE 2.X MetaSr 1.0; SE 2.X MetaSr 1.0; .NET CLR 2.0.50727; SE 2.X MetaSr 1.0)"},
 ]
 
 ips = [
@@ -73,9 +56,16 @@ def goods_parse(driver):
     html = etree.HTML(pagesource)
     return html
 
+def random_headers():
+    ua = UserAgent(verify_ssl=False)
+    return {'User-Agent': ua.random,}
+
+def upload_html(text):
+    with open("./1.html","w",encoding="utf-8") as f:
+        f.write(text)
+
 def goods_info(url):
-    headers = headers_list[random.randint(0,5)]
-    response = requests.get(url=url, headers=headers)
+    response = requests.get(url=url, headers=random_headers())
     text = response.text
     html = etree.HTML(text)
     return html
@@ -84,7 +74,8 @@ def goods_driver():
     driver = webdriver.Chrome(r"C:\Program Files (x86)\Google\Chrome Dev\Application\chromedriver")
     return driver
 
-def goods_info_parse(url):
+def goods_info_parse(url,goods_page):
+    goods_gender = url.split("-")[0].split("/")[-1]
     html = goods_info(url)
     goods_names = html.xpath("//dd[@class='p-l-name']/a/text()")
     goods_prices = html.xpath("//dd[@class='p-l-price']/text()")
@@ -92,15 +83,40 @@ def goods_info_parse(url):
     for goods_url in goods_urls:
         sleep_time()
         info_html = goods_info(goods_url)
-        goods_color = info_html.xpath("//div[@class='product-info']/div/text()")
-        print(goods_color)
+        goods_name = goods_names[goods_urls.index(goods_url)]
+        goods_price = goods_prices[goods_urls.index(goods_url)]
+        goods_model = info_html.xpath("//div[@class='product-info']/div/text()")[1].split(":")[1].strip()
+        goods_color = info_html.xpath("//div[@class='product-info']/div/text()")[0].split(":")[1].strip()
+        goods_sizes = ["all"]
+        goods_details = info_html.xpath("//div[@class='product-description']/li/text()")
+        goods_images = ["https:{}".format(i.replace("1S_NEW","1L_NEW")) for i in info_html.xpath("//div[@class='product-thumb-list']/a/@data-img")]
+
+        goods_order = goods_urls.index(goods_url) + 1 + (int(url.split("&pageNo=")[-1]) - 1) * 12
+        print(goods_name)
+
+        writer.writerow((
+            goods_name,
+            goods_model,
+            goods_price,
+            "{}0".format(goods_price[0]),
+            goods_color,
+            goods_sizes,
+            goods_details,
+            goods_images,
+            goods_order,
+            goods_gender,
+            goods_page,
+            goods_url,
+        ))
+
     if len(goods_urls) != 0:
         url = "{}&pageNo={}".format(url.split("&pageNo=")[0],int(url.split("&pageNo=")[-1]) + 1)
-        goods_info_parse(url)
+        goods_info_parse(url,goods_page)
 
 def main():
     for url in urls:
-        goods_info_parse(url)
+        goods_page = urls.index(url) + 1
+        goods_info_parse(url,goods_page)
 
 if __name__ == "__main__":
     main()
