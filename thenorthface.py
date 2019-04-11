@@ -2,6 +2,7 @@ from lxml import etree
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.common.exceptions import NoSuchElementException
+from fake_useragent import UserAgent
 
 import requests
 import random
@@ -21,7 +22,10 @@ writer.writerow(("goods_name","goods_model","goods_price","goods_discount_price"
 ssl._create_default_https_context = ssl._create_stdlib_context
 
 urls = [
-    "https://www.thenorthface.com/shop/womens-accessories-caps?facet=&beginIndex=0#facet=&beginIndex=0",
+    "https://www.thenorthface.com/shop/mens-accessories-hats",
+    "https://www.thenorthface.com/shop/womens-accessories-caps",
+    "https://www.thenorthface.com/shop/kids-girls-accessories",
+    "https://www.thenorthface.com/shop/kids-boys-accessories",
 ]
 
 
@@ -55,7 +59,7 @@ def goods_parse(driver):
     return html
 
 def goods_info(url):
-    response = requests.get(url=url, headers=headers)
+    response = requests.get(url=url, headers={'User-Agent': UserAgent(verify_ssl=False).random})
     text = response.text
     html = etree.HTML(text)
     return html
@@ -73,17 +77,19 @@ def move_goods_list(driver):
     return [goods_count,goods_name]
 
 def goods_comment(url):
-    goods_comment_response = requests.get(url=url, headers=headers)
+    goods_comment_response = requests.get(url=url, headers={'User-Agent': UserAgent(verify_ssl=False).random})
     goods_comment_json = eval(goods_comment_response.text.replace("true", "True").replace("false", "False").replace("null", "None"))["results"][0]["reviews"]
     g_comments = [{"goods_comment_star": i["metrics"]["rating"],
                     "goods_comment_time": timeStamp(i["details"]["created_date"]),
-                    "goods_comment_comment": i["details"]["comments"],} for i in goods_comment_json]
+                    "goods_comment_comment": i["details"]["comments"].replace("\ud83d\ude0d","").replace("\","),} for i in goods_comment_json]
     return g_comments
 
 goods_imgs = lambda x:[x["i"]["n"]] if isinstance(x,dict) else [i["i"]["n"] for i in x]
 
 def url_parse(url,goods_page):
     gender = url.split("-")[0].split("/")[-1]
+    if gender == "kids":
+        gender = url.split("-")[1]
     driver = goods_driver()
     sleep_time()
     driver.get(url)
@@ -119,36 +125,39 @@ def url_parse(url,goods_page):
             goods_html = goods_info(g_url)
             goods_sizes = goods_html.xpath("//div[@class='product-content-form-attr-container attr-container attr-container-js swatches ']/button/@data-attribute-value")
 
-            goods_image_json_response = requests.get(url="https://images.thenorthface.com/is/image/TheNorthFace/{}_IS?req=set,json,UTF-8&labelkey=label&handler=s7sdkJSONResponse".format(goods_models[goods_types.index(goods_type)]), headers=headers)
+            goods_image_json_response = requests.get(url="https://images.thenorthface.com/is/image/TheNorthFace/{}_IS?req=set,json,UTF-8&labelkey=label&handler=s7sdkJSONResponse".format(goods_models[goods_types.index(goods_type)]), headers={'User-Agent': UserAgent(verify_ssl=False).random})
             goods_image_json = eval(goods_image_json_response.text.replace("/*jsonp*/s7sdkJSONResponse(","").replace(',"");',""))
             goods_images = ["https://images.thenorthface.com/is/image/{}?fit=constrain,1&wid=1080&hei=1080&fmt=jpg&$VFDP-VIEWER-THUMBNAIL$".format(i) for i in goods_imgs(goods_image_json["set"]["item"])]
 
             goods_comments = []
-            goods_comment_url = "https://display.powerreviews.com/m/957729/l/en_US/product/{}/reviews?paging.from=0&paging.size=10&filters=&search=&sort=Newest&image_only=false&apikey=dc148023-20d1-4554-864d-fec4a6902345".format(goods_model.split("_")[0])
-            while True:
-                g_comments = goods_comment(goods_comment_url)
-                goods_comments += g_comments
-                goods_comment_url = "{}?paging.from={}&paging.size=10&filters=&search=&sort=Newest&image_only=false&apikey=dc148023-20d1-4554-864d-fec4a6902345".format(goods_comment_url.split("?paging.from=")[0], int(goods_comment_url.split("?paging.from=")[-1].split("&")[0]) + 10)
-                if len(g_comments) == 0:
-                    break
-            print(len(goods_comments))
+            try:
+                goods_comment_url = "https://display.powerreviews.com/m/957729/l/en_US/product/{}/reviews?paging.from=0&paging.size=10&filters=&search=&sort=Newest&image_only=false&apikey=dc148023-20d1-4554-864d-fec4a6902345".format(goods_model.split("_")[0])
+                while True:
+                    g_comments = goods_comment(goods_comment_url)
+                    goods_comments += g_comments
+                    goods_comment_url = "{}?paging.from={}&paging.size=10&filters=&search=&sort=Newest&image_only=false&apikey=dc148023-20d1-4554-864d-fec4a6902345".format(goods_comment_url.split("?paging.from=")[0], int(goods_comment_url.split("?paging.from=")[-1].split("&")[0]) + 10)
+                    if len(g_comments) == 0:
+                        break
+            except:
+                pass
+            print(goods_name)
 
-            # writer.writerow((
-            #     goods_name,
-            #     goods_model,
-            #     goods_price,
-            #     goods_discount_price,
-            #     goods_color,
-            #     goods_sizes,
-            #     goods_details,
-            #     goods_images,
-            #     "",
-            #     goods_order,
-            #     gender,
-            #     goods_page,
-            #     goods_comments,
-            #     g_url,
-            # ))
+            writer.writerow((
+                goods_name,
+                goods_model,
+                goods_price,
+                goods_discount_price,
+                goods_color,
+                goods_sizes,
+                goods_details,
+                goods_images,
+                "",
+                goods_order,
+                gender,
+                goods_page,
+                goods_comments,
+                g_url,
+            ))
     driver.close()
 
 def main():

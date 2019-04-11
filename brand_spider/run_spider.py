@@ -8,9 +8,9 @@ spider_name = [
                 "kith","nike",
                 "zara","hm",
                 "gucci","lining",
+                "prada",
                 ]
 
-#thehundreds,matix,marmot
 def main():
     args = sys.argv[-1]
     if args == "-h" or args == "-help":
@@ -23,6 +23,7 @@ def main():
               "\n                     hm"
               "\n                     gucci"
               "\n                     lining"
+              "\n                     prada"
               )
     elif args in spider_name:
         path = os.path.join(".", "data", datetime.datetime.now().strftime("%Y-%m-%d"))
