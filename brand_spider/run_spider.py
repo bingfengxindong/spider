@@ -8,7 +8,7 @@ spider_name = [
                 "kith","nike",
                 "zara","hm",
                 "gucci","lining",
-                "prada",
+                "prada","kenzo",
                 ]
 
 def main():
@@ -24,6 +24,7 @@ def main():
               "\n                     gucci"
               "\n                     lining"
               "\n                     prada"
+              "\n                     kenzo"
               )
     elif args in spider_name:
         path = os.path.join(".", "data", datetime.datetime.now().strftime("%Y-%m-%d"))
