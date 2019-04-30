@@ -71,9 +71,9 @@ class PradaSpider(scrapy.Spider):
         goods_info = eval(response.text.replace("true","True").replace("false","False"))["response"]["catalogEntryView"][0]
         goods_name = goods_info["name"]
         goods_model = goods_info["mfPartNumber_ntk"]
-        g_price = goods_info["price"][0]["formattedPrice"]
-        goods_price = "{}{}".format(g_price.split(" ")[1],g_price.split(" ")[0])
-        goods_discount_price = "{}0".format(g_price.split(" ")[1])
+        g_price = goods_info["price"][0]["value"]
+        goods_price = "${}".format(g_price)
+        goods_discount_price = "$0"
         goods_color = goods_info["colors"]
         goods_size = [i["value"] for i in goods_info["sizeCodes"]]
         goods_details = goods_info["shortDescription"].split("\n")

@@ -55,7 +55,7 @@ class KenzoSpider(scrapy.Spider):
         goods_model = goods_url.split("/")[-1].split("?")[0].strip(".html")
         goods_price = response.xpath("//div[@class='productpage-fiche-price']/div/div/text()").extract()[0].replace("\n","").replace("\t","").strip()
         goods_discount_price = "{}0".format(goods_price[0])
-        goods_color = response.xpath("//span[@class='color-tooltip']/text()").extract()[0]
+        goods_color = response.xpath("//li[@class='selected']/span[@class='color-tooltip']/text()").extract()[0]
         goods_size = ["all"]
         goods_details1 = [i.replace("\n","").replace("\t","").strip() for i in response.xpath("//div[@itemprop='description']/div/text()").extract() if i.replace("\n","").replace("\t","").strip() != ""]
         goods_details2 = [i.replace("\n","").replace("\t","").strip() for i in response.xpath("//div[@class='productpage-fiche-size expandable']/div/text()").extract() if i.replace("\n","").replace("\t","").strip() != ""]

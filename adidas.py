@@ -1,5 +1,6 @@
 from lxml import etree
 from selenium import webdriver
+from fake_useragent import UserAgent
 from selenium.webdriver import ActionChains
 from selenium.common.exceptions import NoSuchElementException
 
@@ -43,6 +44,10 @@ headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36',
 }
 
+def random_headers():
+    ua = UserAgent(verify_ssl=False)
+    return {'User-Agent': ua.random,}
+
 def sleep_time():
     """
     睡眠0-2s之间的随机时间
@@ -50,6 +55,10 @@ def sleep_time():
     """
     ran_time = random.uniform(0,1)
     time.sleep(ran_time)
+
+def upload_html(text):
+    with open("./1.html","w",encoding="utf-8") as f:
+        f.write(text)
 
 def goods_url_parse(driver):
     # 获取页面源码
@@ -59,7 +68,7 @@ def goods_url_parse(driver):
     return goods_urls
 
 def goods_info(url):
-    response = requests.get(url=url, headers=headers)
+    response = requests.get(url=url, headers=random_headers())
     text = response.text
     html = etree.HTML(text)
     return html
@@ -88,9 +97,9 @@ def exit_ten(driver,urls_len,url,u_len,goods_gender,goods_page):
         if "鞋" not in goods_name:
             # 产品价格
             goods_price = html_detail.xpath("//span[@class='goods-price price-single']/text()|//span[@class='goods-price']/text()")[0]
-            goods_discount_price = discount_price(html_detail.xpath("//span[@class='goods-price']/del/text()"))
+            goods_discount_price = discount_price(html_detail.xpath("//span[@class='goods-price']/del/text()")).replace("\n","").replace("\t","").strip()
             # 产品尺码
-            goods_sizes = [i.replace("\n", "").replace("\t", "") for i in html_detail.xpath("//ul[@class='float-clearfix']/li/a/text()") if i.replace("\n", "").replace("\t", "") != ""]
+            goods_sizes = [i.replace("\n", "").replace("\t", "").strip() for i in html_detail.xpath("//ul[@class='float-clearfix']/li/a/text()") if i.replace("\n", "").replace("\t", "").strip() != ""]
             # 产品详情
             goods_details = html_detail.xpath("//div[@class='float-clearfix']/div/p/text()|//div[@class='float-clearfix']/div/ul/li/p/text()")
             # 产品评论

@@ -26,15 +26,6 @@ urls = [
     "https://www.converse.com.cn/women-accessories/category.htm?attributeParams=&propertyCode=cap&size=&maxprice=&minprice=&sort=showOrder&rowsNum=&isPaging=false&pageNo=1",
 ]
 
-ips = [
-    '221.6.201.18:9999',
-    '113.200.56.13:8010',
-    '101.37.79.125:3128',
-    '171.221.239.11:808',
-    '202.112.237.102:3128',
-    '106.12.32.43:3128',
-]
-
 def sleep_time():
     """
     睡眠0-2s之间的随机时间
@@ -85,6 +76,7 @@ def goods_info_parse(url,goods_page):
         info_html = goods_info(goods_url)
         goods_name = goods_names[goods_urls.index(goods_url)]
         goods_price = goods_prices[goods_urls.index(goods_url)]
+        print(goods_url)
         goods_model = info_html.xpath("//div[@class='product-info']/div/text()")[1].split(":")[1].strip()
         goods_color = info_html.xpath("//div[@class='product-info']/div/text()")[0].split(":")[1].strip()
         goods_sizes = ["all"]

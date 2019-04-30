@@ -59,13 +59,18 @@ class KithSpider(scrapy.Spider):
         goods_name = response.xpath("//h1[@class='product-single__title']/text()").extract()[0]
         goods_details = [i.replace("<p>","").replace("</p>","").replace("<span>","").replace("</span>","").replace("\xa0","").replace("<strong>","").replace("</strong>","").strip() for i in response.xpath("//div[@id='product-single-description']/p").extract()]
         goods_details = [i for i in goods_details if i != ""]
-        goods_model = goods_details[-3].split(":")[-1].strip()
-        goods_color = goods_details[-2].split(":")[-1].strip()
+        try:
+            goods_model = goods_details[-3].split(":")[-1].strip()
+            goods_color = goods_details[-2].split(":")[-1].strip()
+        except:
+            goods_model = goods_url.split("/")[-1].upper()
+            goods_color = response.xpath("//h2[@class='product-single__color']/text()").extract()[0]
         goods_price = response.xpath("//button[@class='btn product-form__add-to-cart']/span/text()").extract()[0]
         goods_discount_price = "$0"
         goods_size = response.xpath("//div[@class='swatch clearfix']/div/label/span/text()").extract()
         goods_images = ["https:%s"%i.replace("300x300","2048x") for i in response.xpath("//div[@class='product-single__images']/div[1]/div/div/img/@src").extract()]
 
+        print(goods_name)
         yield {
             "goods_name": goods_name,
             "goods_model": goods_model,

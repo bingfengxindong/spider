@@ -1,28 +1,45 @@
 import requests
 import random
-'''代理IP地址（高匿）'''
-ips = [
-    '221.6.201.18:9999',
-    '113.200.56.13:8010',
-    '101.37.79.125:3128',
-    '171.221.239.11:808',
-    '202.112.237.102:3128',
-    '106.12.32.43:3128',
-]
-#国外
-# ips = [
-#     "123.1.150.244:80", #https
-#     "47.52.210.47:80", #http
-# ]
+from lxml import etree
+from fake_useragent import UserAgent
 
-# proxy = {
-#   'https': ips[random.choice([0,1,2,3,4,5])]
-# }
-'''head 信息'''
-head = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36',
-       'Connection': 'keep-alive'}
-'''http://icanhazip.com会返回当前的IP地址'''
-for ip in ips:
-    # print(ip)
-    p = requests.get('http://icanhazip.com', headers=head, proxies={"https":ip})
-    print(p.text)
+# for ip in ips:
+#     # print(ip)
+#     p = requests.get('http://icanhazip.com', headers=head, proxies={"https":ip})
+#     print(p.text)
+
+def random_headers():
+    ua = UserAgent(verify_ssl=False)
+    return {
+        "User-Agent": ua.random,
+    }
+
+def upload_html(text):
+    with open("./1.html","w",encoding="utf-8") as f:
+        f.write(text)
+
+def ip_s():
+    ip_text = requests.get(url="https://www.kuaidaili.com/free/inha/",headers=random_headers())
+    ip_html = etree.HTML(ip_text.text)
+    ips = ip_html.xpath("//td[@data-title='IP']/text()")
+    return ips
+
+print(ip_s())
+
+# import copy
+#
+# def list_indexs(ls,a):
+#     ls1 = copy.copy(ls)
+#     ls_index = []
+#     for i in ls1:
+#         if a in ls1:
+#             ls_index.append(ls1.index(a))
+#             ls1[ls1.index(a)] = "{}a".format(ls1[ls1.index(a)])
+#     return ls_index
+#
+# list = [3, 4, 5, 6, 6, 5, 4, 3, 2, 1, 7, 8, 8, 3]
+# a = 3
+# print(list_indexs(list,a))
+#
+#
+# print([i[0] for i in enumerate(list) if i[1] == 3])
