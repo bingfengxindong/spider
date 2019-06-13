@@ -21,10 +21,10 @@ def sleep_time():
     # print(ran_time)
     time.sleep(ran_time)
 
-path = os.path.join(".","goods_info",datetime.datetime.now().strftime("%Y-%m-%d"))
+path = os.path.join(".","data",datetime.datetime.now().strftime("%Y-%m-%d"))
 if not os.path.exists(path):
     os.makedirs(path)
-file = open(os.path.join(".","goods_info",datetime.datetime.now().strftime("%Y-%m-%d"),"stussy.csv"),"w+",encoding="utf-8",newline="")
+file = open(os.path.join(".","data",datetime.datetime.now().strftime("%Y-%m-%d"),"stussy.csv"),"w+",encoding="utf-8",newline="")
 writer = csv.writer(file)
 writer.writerow(("goods_name","goods_model","goods_price","goods_discount_price","goods_color","goods_size","goods_details","goods_images","goods_num","gender","goods_page","goods_url"))
 
@@ -115,7 +115,7 @@ for url in urls:
             "goods_num": goods_num,
             "gender": gender,
             }
-            print(goods_info)
+            # print(goods_name)
             writer.writerow((
                 goods_info["goods_name"],
                 goods_info["goods_model"],
@@ -130,4 +130,4 @@ for url in urls:
                 goods_page,
                 goods_url,
             ))
-            print("%s抓取完成" % goods_model)
+            print("%s抓取完成" % goods_name)

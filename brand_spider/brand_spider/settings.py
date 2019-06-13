@@ -57,10 +57,11 @@ DOWNLOADER_CLIENTCONTEXTFACTORY = "brand_spider.context.CustomContextFactory"
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
+DOWNLOADER_MIDDLEWARES = {
    # 'brand_spider.middlewares.BrandSpiderDownloaderMiddleware': 543,
    # 'brand_spider.middlewares.ProxyMiddleware': 543,
-# }
+   'brand_spider.middlewares.SelenumMiddleware': 543,
+}
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html

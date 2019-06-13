@@ -79,7 +79,7 @@ class PradaSpider(scrapy.Spider):
         goods_details = goods_info["shortDescription"].split("\n")
         goods_details.append(goods_info["longDescription"])
         goods_images = ["{}/_jcr_content/renditions/cq5dam.web.white.1280x1280.jpeg".format(i["attachmentAssetPath"]) for i in goods_info["attachments"]]
-        print(goods_images)
+        print(goods_name)
 
         yield {
             "goods_name": goods_name,

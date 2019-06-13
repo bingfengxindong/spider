@@ -12,10 +12,10 @@ import csv
 import os
 import datetime
 
-path = os.path.join(".","goods_info",datetime.datetime.now().strftime("%Y-%m-%d"))
+path = os.path.join(".","data",datetime.datetime.now().strftime("%Y-%m-%d"))
 if not os.path.exists(path):
     os.makedirs(path)
-file = open(os.path.join(".","goods_info",datetime.datetime.now().strftime("%Y-%m-%d"),"adidas.csv"),"w+",encoding="utf-8",newline="")
+file = open(os.path.join(".","data",datetime.datetime.now().strftime("%Y-%m-%d"),"adidas.csv"),"w+",encoding="utf-8",newline="")
 writer = csv.writer(file)
 writer.writerow(("goods_name","goods_model","goods_price","goods_discount_price","goods_color","goods_size","goods_details","goods_images","goods_title","goods_num","gender","goods_page","goods_comments","goods_url"))
 
@@ -86,7 +86,7 @@ def exit_ten(driver,urls_len,url,u_len,goods_gender,goods_page):
         if len(goods_url) == urls_len:
             break
     goods_urls = [i.replace("\n","").replace("\t","").strip() for i in goods_url_parse(driver)]
-    print(len(goods_urls))
+    # print(len(goods_urls))
     for goods_url in goods_urls:
         # 产品顺序
         goods_order = u_len + goods_urls.index(goods_url) + 1
@@ -129,6 +129,7 @@ def exit_ten(driver,urls_len,url,u_len,goods_gender,goods_page):
             #产品页面编号
             goods_page = goods_page
 
+            print(goods_name)
             writer.writerow((
                 goods_name,
                 goods_model,

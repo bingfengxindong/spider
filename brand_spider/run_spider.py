@@ -27,7 +27,7 @@ def main():
               "\n                     kenzo"
               )
     elif args in spider_name:
-        path = os.path.join(".", "data", datetime.datetime.now().strftime("%Y-%m-%d"))
+        path = os.path.join("..", "data", datetime.datetime.now().strftime("%Y-%m-%d"))
         if not os.path.exists(path):
             os.makedirs(path)
         spider_command = "scrapy crawl %s -o %s\%s.csv" % (args, path, args)

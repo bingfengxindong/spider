@@ -12,10 +12,10 @@ import csv
 import os
 import datetime
 
-path = os.path.join(".","goods_info",datetime.datetime.now().strftime("%Y-%m-%d"))
+path = os.path.join(".","data",datetime.datetime.now().strftime("%Y-%m-%d"))
 if not os.path.exists(path):
     os.makedirs(path)
-file = open(os.path.join(".","goods_info",datetime.datetime.now().strftime("%Y-%m-%d"),"thenorthface.csv"),"w+",encoding="utf-8",newline="")
+file = open(os.path.join(".","data",datetime.datetime.now().strftime("%Y-%m-%d"),"thenorthface.csv"),"w+",encoding="utf-8",newline="")
 writer = csv.writer(file)
 writer.writerow(("goods_name","goods_model","goods_price","goods_discount_price","goods_color","goods_size","goods_details","goods_images","goods_title","goods_num","gender","goods_page","goods_comments","goods_url"))
 
@@ -51,6 +51,10 @@ def timeStamp(timeNum):
     timeArray = time.localtime(timeStamp)
     otherStyleTime = time.strftime("%Y/%m/%d", timeArray)
     return otherStyleTime
+
+def upload_html(text):
+    with open("./1.html","w",encoding="utf-8") as f:
+        f.write(text)
 
 def goods_parse(driver):
     # 获取页面源码
@@ -105,13 +109,14 @@ def url_parse(url,goods_page):
         else:
             break
     goods_type_infos = goods_parse(driver).xpath("//div[@class='product-block product-block-js lanes']")
+    print(len(goods_type_infos))
     for goods_type_info in goods_type_infos:
         goods_type_info_html = etree.HTML(etree.tostring(goods_type_info,encoding="utf-8").decode("utf-8"))
         goods_url = goods_type_info_html.xpath("//a[@class='product-block-name-link']/@href")[0]
         goods_types = goods_type_info_html.xpath("//div[@class='product-block-color-swatches-container swatches-container']/div/@id")
 
         goods_name = goods_type_info_html.xpath("//span[@class='product-block-name-wrapper']/text()")[0]
-        goods_price = goods_type_info_html.xpath("//span[@class='product-block-price product-block-offer-price offer-price product-price-amount-js']/text()|//span[@class='product-block-price product-block-range-price range product-price-amount-js']/text()")[0].replace("\n","").replace("\t","").strip()
+        goods_price = goods_type_info_html.xpath("//span[@class='product-block-price product-block-offer-price offer-price product-price-amount-js']/text()|//span[@class='product-block-price product-block-range-price range product-price-amount-js']/text()|//span[@class='product-block-price product-block-current-price current-price  product-price-amount-js']/text()")[0].replace("\n","").replace("\t","").strip()
         goods_discount_price = "{}0".format(goods_price[0])
         goods_color_models = goods_type_info_html.xpath("//div[@class='product-block-color-swatches-container swatches-container']/div/@title")
         goods_colors = [i.split("(")[0].strip().lower() for i in goods_color_models]

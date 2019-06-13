@@ -6,8 +6,12 @@
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+from selenium import webdriver
+from scrapy.http import HtmlResponse
+from lxml import etree
 import scrapy
 import random
+import time
 
 class BrandSpiderSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
@@ -117,3 +121,23 @@ class ProxyMiddleware(object):
     def process_request(self,request,spider):
         ip = random.choice(self.ip)
         request.meta["proxy"] = ip
+
+class SelenumMiddleware:
+    def sleep_time(self):
+        """
+        睡眠0-2s之间的随机时间
+        :return:
+        """
+        ran_time = random.uniform(0, 1)
+        time.sleep(ran_time)
+
+    def process_request(self,request,spider):
+        if spider.name == "nike":
+            driver = webdriver.Chrome(r"C:\Program Files (x86)\Google\Chrome Dev\Application\chromedriver.exe")
+            driver.maximize_window()
+            self.sleep_time()
+            driver.get(request.url)
+            pagesource = driver.page_source
+            return HtmlResponse(driver.current_url,body=pagesource,encoding="utf-8",request=request)
+        else:
+            return

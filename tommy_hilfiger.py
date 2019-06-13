@@ -13,10 +13,10 @@
 # import os
 # import datetime
 #
-# path = os.path.join(".","goods_info",datetime.datetime.now().strftime("%Y-%m-%d"))
+# path = os.path.join(".","data",datetime.datetime.now().strftime("%Y-%m-%d"))
 # if not os.path.exists(path):
 #     os.makedirs(path)
-# file = open(os.path.join(".","goods_info",datetime.datetime.now().strftime("%Y-%m-%d"),"tommy_hilfiger.csv"),"w+",encoding="utf-8",newline="")
+# file = open(os.path.join(".","data",datetime.datetime.now().strftime("%Y-%m-%d"),"tommy_hilfiger.csv"),"w+",encoding="utf-8",newline="")
 # writer = csv.writer(file)
 # writer.writerow(("goods_name","goods_model","goods_price","goods_discount_price","goods_color","goods_size","goods_details","goods_images","goods_num","gender","goods_page","goods_url"))
 #

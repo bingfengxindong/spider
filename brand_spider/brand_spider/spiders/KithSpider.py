@@ -31,6 +31,10 @@ class KithSpider(scrapy.Spider):
         'Upgrade-Insecure-sRequests': '1',
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36',
     }
+    def upload_html(self,response):
+        with open("./1.html","w",encoding="utf-8") as f:
+            f.write(response.text)
+
     def start_requests(self):
         for start_url in self.start_urls:
             yield scrapy.Request(url=start_url,callback=self.parse,headers=self.headers,meta={"url":start_url,
@@ -39,7 +43,7 @@ class KithSpider(scrapy.Spider):
     def parse(self, response):
         url = response.meta["url"]
         goods_page = response.meta["goods_page"]
-        goods_urls = ["https://kith.com%s"%i for i in response.xpath("//li[@class='collection-product']/div/div/a[1]/@href").extract()]
+        goods_urls = ["https://kith.com%s"%i for i in response.xpath("//li[@class='collection-product']/div/div/div/a[1]/@href").extract()]
         for goods_url in goods_urls:
             goods_order = goods_urls.index(goods_url) + 1 + (int(url.split("=")[1]) - 1)*12
             yield scrapy.Request(url=goods_url,callback=self.goods_info_parse,headers=self.headers,meta={"goods_gender":url.split("-")[0].split("/")[-1][0:-1],
