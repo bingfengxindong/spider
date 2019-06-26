@@ -43,22 +43,22 @@ class HerschelSpider(scrapy.Spider):
                 goods_discount_price = "$0"
             else:
                 goods_discount_price = "$%s"%goods_discount_price[0]
-            # if goods_gender == "kids":
-            #     yield scrapy.Request(url="https://herschel.com%s" % g_url,callback=self.goods_url_parse,headers=self.headers,meta={"g_url": g_url,
-            #                                                                                                                          "goods_price": goods_price,
-            #                                                                                                                          "goods_discount_price": goods_discount_price,
-            #                                                                                                                          "goods_gender": goods_gender,
-            #                                                                                                                          "goods_page": goods_page,
-            #                                                                                                                          "goods_order": goods_order,
-            #                                                                                                                          })
-            # else:
-            yield scrapy.Request(url="https://herschel.com%s"%g_url,callback=self.goods_url_parse,headers=self.headers,meta={"g_url":g_url,
-                                                                                                                                  "goods_price":goods_price,
-                                                                                                                                  "goods_discount_price":goods_discount_price,
-                                                                                                                                  "goods_gender":goods_gender,
-                                                                                                                                  "goods_page":goods_page,
-                                                                                                                                  "goods_order":goods_order,
-                                                                                                                                  },dont_filter=True)
+            if goods_gender == "kids":
+                yield scrapy.Request(url="https://herschel.com%s" % g_url,callback=self.goods_url_parse,headers=self.headers,meta={"g_url": g_url,
+                                                                                                                                     "goods_price": goods_price,
+                                                                                                                                     "goods_discount_price": goods_discount_price,
+                                                                                                                                     "goods_gender": goods_gender,
+                                                                                                                                     "goods_page": goods_page,
+                                                                                                                                     "goods_order": goods_order,
+                                                                                                                                     })
+            else:
+                yield scrapy.Request(url="https://herschel.com%s"%g_url,callback=self.goods_url_parse,headers=self.headers,meta={"g_url":g_url,
+                                                                                                                                      "goods_price":goods_price,
+                                                                                                                                      "goods_discount_price":goods_discount_price,
+                                                                                                                                      "goods_gender":goods_gender,
+                                                                                                                                      "goods_page":goods_page,
+                                                                                                                                      "goods_order":goods_order,
+                                                                                                                                      },dont_filter=True)
 
     def goods_url_parse(self,response):
         g_url = response.meta["g_url"]
@@ -68,27 +68,27 @@ class HerschelSpider(scrapy.Spider):
         goods_page = response.meta["goods_page"]
         goods_order = response.meta["goods_order"]
         g_name = g_url.split("/")[-1].split("?")[0]
-        goods_models = set(response.xpath("//li[@class='colors-list__color']/label/@id|//li[@class='colors-list__color on']/label/@id").extract())
+        goods_models = set(response.xpath("//li[@class='colors-list__color']/label/@id|//li[@class='colors-list__color on']/label/@id|//li[@class='colors-list__color colors-list__desktopandmobile']/label/@id|//li[@class='colors-list__color colors-list__desktopandmobile on']/label/@id").extract())
         for goods_model in goods_models:
             goods_url = "https://herschel.com/shop/headwear/%s?v=%s"%(g_name,goods_model)
-            # if goods_gender == "kids":
-            #     yield scrapy.Request(url=goods_url,callback=self.info_parse,headers=self.headers,meta={"goods_model": goods_model,
-            #                                                                                            "goods_url": goods_url,
-            #                                                                                            "goods_price": goods_price,
-            #                                                                                            "goods_discount_price": goods_discount_price,
-            #                                                                                            "goods_gender": goods_gender,
-            #                                                                                            "goods_page": goods_page,
-            #                                                                                            "goods_order": goods_order,
-            #                                                                                            })
-            # else:
-            yield scrapy.Request(url=goods_url,callback=self.info_parse,headers=self.headers,meta={"goods_model":goods_model,
-                                                                                                    "goods_url":goods_url,
-                                                                                                    "goods_price": goods_price,
-                                                                                                    "goods_discount_price": goods_discount_price,
-                                                                                                    "goods_gender": goods_gender,
-                                                                                                    "goods_page": goods_page,
-                                                                                                    "goods_order": goods_order,
-                                                                                                   },dont_filter=True)
+            if goods_gender == "kids":
+                yield scrapy.Request(url=goods_url,callback=self.info_parse,headers=self.headers,meta={"goods_model": goods_model,
+                                                                                                       "goods_url": goods_url,
+                                                                                                       "goods_price": goods_price,
+                                                                                                       "goods_discount_price": goods_discount_price,
+                                                                                                       "goods_gender": goods_gender,
+                                                                                                       "goods_page": goods_page,
+                                                                                                       "goods_order": goods_order,
+                                                                                                       })
+            else:
+                yield scrapy.Request(url=goods_url,callback=self.info_parse,headers=self.headers,meta={"goods_model":goods_model,
+                                                                                                        "goods_url":goods_url,
+                                                                                                        "goods_price": goods_price,
+                                                                                                        "goods_discount_price": goods_discount_price,
+                                                                                                        "goods_gender": goods_gender,
+                                                                                                        "goods_page": goods_page,
+                                                                                                        "goods_order": goods_order,
+                                                                                                       },dont_filter=True)
 
     def info_parse(self,response):
         goods_name = response.xpath("//h2[@class='product-overview__title']/text()").extract()[0]
