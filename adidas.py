@@ -17,22 +17,24 @@ if not os.path.exists(path):
     os.makedirs(path)
 file = open(os.path.join(".","data",datetime.datetime.now().strftime("%Y-%m-%d"),"adidas.csv"),"w+",encoding="utf-8",newline="")
 writer = csv.writer(file)
-writer.writerow(("goods_name","goods_model","goods_price","goods_discount_price","goods_color","goods_size","goods_details","goods_images","goods_title","goods_num","gender","goods_page","goods_comments","goods_url"))
+writer.writerow(("goods_name","goods_model","goods_price","goods_discount_price","goods_color","goods_size","goods_details","goods_images","goods_title","goods_num","gender","goods_page","goods_comments","goods_url","goods_type"))
 
 ssl._create_default_https_context = ssl._create_stdlib_context
 
 urls = [
-    "https://www.adidas.com.cn/men_hats&gloves&scarves?t=headwear&sex=men",
+    ["https://www.adidas.com.cn/men_hats&gloves&scarves?t=headwear&sex=men","mens","hats"],
+    ["https://www.adidas.com.cn/women_hats&gloves&scarves?t=headwear&sex=women", "womens", "hats"],
+
     # "https://www.adidas.com.cn/men_sweats_clothing?t=fleece&sex=men",
     # "https://www.adidas.com.cn/men_jacketsandtracktops_clothing?t=jacket&sex=men",
     # "https://www.adidas.com.cn/search?t=tshirts&sex=men&ni=374&pf=25-40%2C%2C25-40%2C&pr=-&fo=p25%2Cp25&pn=1&pageSize=120&p=undefined-%E7%94%B7%E5%AD%90%26undefined-%E7%94%B7%E5%AD%90&isSaleTop=false",
-    # "https://www.adidas.com.cn/men_bags?t=bag&sex=men",
-    "https://www.adidas.com.cn/women_hats&gloves&scarves?t=headwear&sex=women",
     # "https://www.adidas.com.cn/women_sweats_clothing?t=fleece&sex=women",
     # "https://www.adidas.com.cn/women_jacketsandtracktops_clothing?t=jacket&sex=women",
     # "https://www.adidas.com.cn/women_bras_clothing_segment?t=bra&sex=women",
     # "https://www.adidas.com.cn/search?t=tshirts&sex=women&ni=377&pf=25-82%2C%2C25-82%2C&pr=-&fo=p25%2Cp25&pn=1&pageSize=120&p=undefined-%E5%A5%B3%E5%AD%90%26undefined-%E5%A5%B3%E5%AD%90&isSaleTop=false",
-    # "https://www.adidas.com.cn/women_bags?t=bag&sex=women",
+
+    ["https://www.adidas.com.cn/men_bags?t=bag&sex=men", "mens", "bags"],
+    ["https://www.adidas.com.cn/women_bags?t=bag&sex=women","womens","bags"],
 ]
 
 
@@ -75,7 +77,7 @@ def goods_info(url):
 
 discount_price = lambda x:"0" if x == [] else x[0]
 
-def exit_ten(driver,urls_len,url,u_len,goods_gender,goods_page):
+def exit_ten(driver,urls_len,url,u_len,goods_gender,goods_page,goods_type):
     for i in range(0,10):
         exit_location = driver.find_element_by_xpath("//i[@class='icon icon-china']")
         ActionChains(driver).move_to_element(exit_location).perform()
@@ -145,6 +147,7 @@ def exit_ten(driver,urls_len,url,u_len,goods_gender,goods_page):
                 goods_page,
                 goods_comments,
                 "https://www.adidas.com.cn{}".format(goods_url.strip()),
+                goods_type,
             ))
 
     if "search?" in url and len(goods_urls) != 0:
@@ -156,13 +159,15 @@ def exit_ten(driver,urls_len,url,u_len,goods_gender,goods_page):
 urls_lens = lambda x:0 if x == "" else int(x)
 
 def url_parse(url,goods_page,u_len=0):
-    goods_gender = url.split("sex=")[-1].split("&")[0]
+    goods_gender = url[1]
+    goods_type = url[2]
+    url = url[0]
     driver = webdriver.Chrome(r"C:\Program Files (x86)\Google\Chrome Dev\Application\chromedriver")
     driver.maximize_window()
     sleep_time()
     driver.get(url)
     urls_len = urls_lens(etree.HTML(driver.page_source).xpath("//span[@class='m-list-num']/text()")[0].replace("\xa0", "").replace("件商品","").replace("[", "").replace("]", "").strip())
-    exit_ten(driver, urls_len,url,u_len,goods_gender,goods_page)
+    exit_ten(driver, urls_len,url,u_len,goods_gender,goods_page,goods_type=goods_type)
     sleep_time()
     driver.close()
 

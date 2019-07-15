@@ -8,9 +8,13 @@ import random
 class HMSpider(scrapy.Spider):
     name = "hm"
     start_urls = [
-        "https://www2.hm.com/en_us/men/products/accessories.html?product-type=men_accessories&sort=stock&productTypes=cap,hat&image-size=small&image=model&offset=0&page-size=72",
-        "https://www2.hm.com/en_us/ladies/products/accessories.html?product-type=ladies_accessories&sort=stock&productTypes=beret,cap,hat&image-size=small&image=stillLife&offset=0&page-size=36",
-        "https://www2.hm.com/en_us/kids/products/view-all.html?sort=stock&productTypes=cap,hat&image-size=small&image=stillLife&offset=0&page-size=252",
+        # "https://www2.hm.com/en_us/men/products/accessories.html?product-type=men_accessories&sort=stock&productTypes=cap,hat&image-size=small&image=model&offset=0&page-size=72",
+        # "https://www2.hm.com/en_us/ladies/products/accessories.html?product-type=ladies_accessories&sort=stock&productTypes=beret,cap,hat&image-size=small&image=stillLife&offset=0&page-size=36",
+        # "https://www2.hm.com/en_us/kids/products/view-all.html?sort=stock&productTypes=cap,hat&image-size=small&image=stillLife&offset=0&page-size=252",
+
+        "https://www2.hm.com/en_us/men/products/view-all.html?sort=stock&productTypes=bag&image-size=small&image=model&offset=0&page-size=36",
+        "https://www2.hm.com/en_us/women/products/view-all.html?sort=stock&productTypes=bag&image-size=small&image=model&offset=0&page-size=36",
+        "https://www2.hm.com/en_us/kids/products/view-all.html?sort=stock&productTypes=bag&image-size=small&image=stillLife&offset=0&page-size=36",
     ]
     headers = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -38,8 +42,18 @@ class HMSpider(scrapy.Spider):
             if goods_gender == "ladies":
                 goods_gender = "women"
             goods_page = self.start_urls.index(start_url)
-            yield scrapy.Request(url=start_url,callback=self.parse,headers=self.headers,meta={"goods_gender":goods_gender,
-                                                                                              "goods_page":goods_page,})
+            yield scrapy.Request(url=start_url,callback=self.num_parse,headers=self.headers,meta={"start_url":start_url,
+                                                                                                "goods_gender":goods_gender,
+                                                                                                "goods_page":goods_page,})
+
+    def num_parse(self,response):
+        all_num = response.xpath("//h2[@class='load-more-heading']/@data-total").extract()[0]
+        start_url = response.meta["start_url"]
+        goods_gender = response.meta["goods_gender"]
+        goods_page = response.meta["goods_page"]
+        url = "{}page-size={}".format(start_url.split("page-size=")[0],all_num)
+        yield scrapy.Request(url=url, callback=self.parse, headers=self.headers,meta={"goods_gender": goods_gender,
+                                                                                        "goods_page": goods_page, })
 
     def parse(self, response):
         goods_gender = response.meta["goods_gender"]

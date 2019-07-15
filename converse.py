@@ -22,8 +22,11 @@ writer.writerow(("goods_name","goods_model","goods_price","goods_discount_price"
 ssl._create_default_https_context = ssl._create_stdlib_context
 
 urls = [
-    "https://www.converse.com.cn/men-accessories/category.htm?attributeParams=&propertyCode=cap&size=&maxprice=&minprice=&sort=showOrder&rowsNum=&isPaging=false&pageNo=1",
-    "https://www.converse.com.cn/women-accessories/category.htm?attributeParams=&propertyCode=cap&size=&maxprice=&minprice=&sort=showOrder&rowsNum=&isPaging=false&pageNo=1",
+    # "https://www.converse.com.cn/men-accessories/category.htm?attributeParams=&propertyCode=cap&size=&maxprice=&minprice=&sort=showOrder&rowsNum=&isPaging=false&pageNo=1",
+    "https://www.converse.com.cn/men-accessories/category.htm?attributeParams=&propertyCode=bag&size=&maxprice=&minprice=&sort=showOrder&rowsNum=&isPaging=false&pageNo=1",
+    # "https://www.converse.com.cn/women-accessories/category.htm?attributeParams=&propertyCode=cap&size=&maxprice=&minprice=&sort=showOrder&rowsNum=&isPaging=false&pageNo=1",
+    "https://www.converse.com.cn/women-accessories/category.htm?attributeParams=&propertyCode=bag&size=&maxprice=&minprice=&sort=showOrder&rowsNum=&isPaging=false&pageNo=1",
+
 ]
 
 def sleep_time():
@@ -69,8 +72,11 @@ def goods_info_parse(url,goods_page):
     goods_gender = url.split("-")[0].split("/")[-1]
     html = goods_info(url)
     goods_names = html.xpath("//dd[@class='p-l-name']/a/text()")
-    goods_prices = html.xpath("//dd[@class='p-l-price']/text()")
+    goods_prices = html.xpath("//dd[@class='p-l-price']/text()|//dd[@class='p-l-price linethrough']/text()")
     goods_urls = ["https://www.converse.com.cn{}".format(i) for i in html.xpath("//dd[@class='p-l-name']/a/@href")]
+    print(goods_names)
+    print(goods_prices)
+    print(goods_urls)
     for goods_url in goods_urls:
         sleep_time()
         info_html = goods_info(goods_url)

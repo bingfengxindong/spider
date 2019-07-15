@@ -11,8 +11,11 @@ import random
 class LiNingSpider(scrapy.Spider):
     name = "lining"
     start_urls = [
-        "http://store.lining.com/shop/goodsCate-sale,desc,1,17s17_133,17_133,17_133_m-0-0-17_133,17_133,17_133_m-1,4s0-0-0-min,max-0.html",
-        "http://store.lining.com/shop/goodsCate-sale,desc,1,17s17_133,17_133,17_133_m-0-0-17_133,17_133,17_133_m-2,4s0-0-0-min,max-0.html",
+        ["http://store.lining.com/shop/goodsCate-sale,desc,1,17s17_133,17_133,17_133_m-0-0-17_133,17_133,17_133_m-1,4s0-0-0-min,max-0.html","mens","hats"],
+        ["http://store.lining.com/shop/goodsCate-sale,desc,1,17s17_133,17_133,17_133_m-0-0-17_133,17_133,17_133_m-2,4s0-0-0-min,max-0.html","womens","hats"],
+
+        ["http://store.lining.com/shop/goodsCate-sale,desc,1,17s17_131,17_131,17_131_m-0-0-17_131,17_131,17_131_m-1,4s0-0-0-min,max-0.html","mens","bags"],
+        ["http://store.lining.com/shop/goodsCate-sale,desc,1,17s17_131,17_131,17_131_m-0-0-17_131,17_131,17_131_m-2,4s0-0-0-min,max-0.html","womens","bags"],
     ]
     # headers = {
     #     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -47,13 +50,9 @@ class LiNingSpider(scrapy.Spider):
 
     def start_requests(self):
         for start_url in self.start_urls:
-            if "17_133_m-1" in start_url:
-                goods_gender = "mens"
-            elif "17_133_m-2" in start_url:
-                goods_gender = "womens"
             goods_page = self.start_urls.index(start_url)
-            yield scrapy.Request(url=start_url,callback=self.parse,headers=self.random_headers(),meta={"url":start_url,
-                                                                                                       "goods_gender":goods_gender,
+            yield scrapy.Request(url=start_url[0],callback=self.parse,headers=self.random_headers(),meta={"url":start_url[0],
+                                                                                                       "goods_gender":start_url[1],
                                                                                                        "goods_page":goods_page,})
 
     def parse(self, response):

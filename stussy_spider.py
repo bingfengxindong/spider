@@ -41,11 +41,26 @@ urls = [
     # "https://www.stussy.com/us/womens/hoodies-sweaters",
     # "https://www.stussy.com/us/womens/jackets",
     # "https://www.stussy.com/us/womens/dresses",
-    "https://www.stussy.com/us/accessories/hats-beanies",
+    # "https://www.stussy.com/us/accessories/hats-beanies",
+    "https://www.stussy.com/us/accessories/bags-backpacks",
 ]
 headers = {
     "user-agent":"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.87 Safari/537.36"
     }
+
+def detail_driver(goods_url):
+    try:
+        driver = webdriver.Chrome(r"C:\Program Files (x86)\Google\Chrome Dev\Application\chromedriver")
+        driver.get(goods_url)
+        pagesource = driver.page_source
+        html_detail = etree.HTML(pagesource)
+        # 产品名字
+        goods_name = html_detail.xpath("//h1[@itemprop='name']/text()")[0].strip("\\n").strip()
+        driver.close()
+    except:
+        html_detail = detail_driver(goods_url)
+    return html_detail
+
 for url in urls:
     response = requests.get(url=url,headers=headers)
     text = response.text
@@ -64,11 +79,20 @@ for url in urls:
         # if goods_url.split("?")[1].split("=")[0] == "color_hat":
         #产品顺序
         goods_num = goods_urls.index(goods_url) + 1
-        driver = webdriver.Chrome(r"C:\Program Files (x86)\Google\Chrome Dev\Application\chromedriver")
-        driver.get(goods_url)
-        pagesource = driver.page_source
-        html_detail = etree.HTML(pagesource)
-        #产品名字
+        html_detail = detail_driver(goods_url)
+        # try:
+        #     driver = webdriver.Chrome(r"C:\Program Files (x86)\Google\Chrome Dev\Application\chromedriver")
+        #     driver.get(goods_url)
+        #     pagesource = driver.page_source
+        #     html_detail = etree.HTML(pagesource)
+        #     #产品名字
+        #     goods_name = html_detail.xpath("//h1[@itemprop='name']/text()")[0].strip("\\n").strip()
+        # except:
+        #     driver = webdriver.Chrome(r"C:\Program Files (x86)\Google\Chrome Dev\Application\chromedriver")
+        #     driver.get(goods_url)
+        #     pagesource = driver.page_source
+        #     html_detail = etree.HTML(pagesource)
+        # 产品名字
         goods_name = html_detail.xpath("//h1[@itemprop='name']/text()")[0].strip("\\n").strip()
         #产品价格
         goods_price = html_detail.xpath("//span[@class='price d-inline']/text()")
@@ -100,7 +124,7 @@ for url in urls:
             img_xpath = "//ul[@id='product-gallery-%s']/div/div/li/img[@class='product-hero-image']/@src"%g_model.split("-")[-1]
             g_images = html_detail.xpath(img_xpath)
             goods_images.append(g_images)
-        driver.close()
+        # driver.close()
         # "产品名字", "产品型号", "产品价格", "产品以前价格", "产品颜色", "产品尺寸", "产品详情", "产品图片", "产品标题", "适合人群"
         for col_i in range(len(colors)):
             goods_info = {

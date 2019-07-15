@@ -7,12 +7,18 @@ import uuid
 class ZaraSpider(scrapy.Spider):
     name = "zara"
     start_urls = [
-        "https://www.zara.com/ww/en/man-accessories-hats-caps-l546.html?v1=1181304",
-        "https://www.zara.com/ww/en/woman-accessories-headwear-l1013.html?v1=1180390",
-        "https://www.zara.com/ww/en/kids-girl-accessories-headwear-l332.html?v1=1211513",
-        "https://www.zara.com/ww/en/kids-boy-accessories-hats-l183.html?v1=1211017",
-        "https://www.zara.com/ww/en/kids-babygirl-accessories-headwear-l92.html?v1=1211514",
-        "https://www.zara.com/ww/en/kids-babyboy-accessories-hats-l9.html?v1=1211515",
+        # "https://www.zara.com/ww/en/man-accessories-hats-caps-l546.html?v1=1181304",
+        # "https://www.zara.com/ww/en/woman-accessories-headwear-l1013.html?v1=1180390",
+        # "https://www.zara.com/ww/en/kids-girl-accessories-headwear-l332.html?v1=1211513",
+        # "https://www.zara.com/ww/en/kids-boy-accessories-hats-l183.html?v1=1211017",
+        # "https://www.zara.com/ww/en/kids-babygirl-accessories-headwear-l92.html?v1=1211514",
+        # "https://www.zara.com/ww/en/kids-babyboy-accessories-hats-l9.html?v1=1211515",
+
+        "https://www.zara.com/ww/en/man-bags-l563.html?v1=1282725",
+        "https://www.zara.com/ww/en/woman-bags-l1024.html?v1=1281538",
+        "https://www.zara.com/ww/en/kids-girl-bags-l346.html?v1=1282218",
+        "https://www.zara.com/ww/en/kids-boy-backpacks-l197.html?v1=1283336",
+        "https://www.zara.com/ww/en/kids-babygirl-bags-l100.html?v1=1283579",
     ]
     headers = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',

@@ -2,6 +2,7 @@ import os
 import datetime
 import sys
 
+# gucci prada kenzo
 spider_name = [
                 "newlook",
                 "herschel",

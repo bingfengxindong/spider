@@ -11,8 +11,11 @@ import random
 class KithSpider(scrapy.Spider):
     name = "nike"
     start_urls = [
-        "https://store.nike.com/cn/zh_cn/pw/mens-hats-caps/7puZof1",
-        "https://store.nike.com/cn/zh_cn/pw/womens-hats-caps/7ptZof1",
+        # "https://store.nike.com/cn/zh_cn/pw/mens-hats-caps/7puZof1",
+        # "https://store.nike.com/cn/zh_cn/pw/womens-hats-caps/7ptZof1",
+
+        # "https://store.nike.com/cn/zh_cn/pw/mens-bags-backpacks/7puZof2",
+        "https://store.nike.com/cn/zh_cn/pw/womens-bags-backpacks/7ptZof2",
     ]
     headers = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -55,7 +58,8 @@ class KithSpider(scrapy.Spider):
     def parse(self, response):
         goods_gender = response.meta["goods_gender"]
         goods_page = response.meta["goods_page"]
-        goods_details = response.xpath("//div[@class='exp-product-wall']/div").extract()
+        goods_details = response.xpath("//div[@class='exp-product-wall']/div|//div[@class='exp-product-wall clearfix']/div").extract()
+        print(len(goods_details))
         for goods_detail in goods_details:
             goods_detail_html = etree.HTML(goods_detail)
             goods_price = goods_detail_html.xpath("//span[@class='local nsg-font-family--base']/text()")[0]

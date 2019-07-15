@@ -14,6 +14,9 @@ class GucciSpider(scrapy.Spider):
         "https://www.gucci.com/us/en/c/productgrid?categoryCode=women-accessories-hats-and-gloves&show=Page&page=0",
         "https://www.gucci.com/us/en/c/productgrid?categoryCode=children-boys-accessories&show=Page&page=0",
         "https://www.gucci.com/us/en/c/productgrid?categoryCode=girls-soft-accessories&show=Page&page=0",
+
+        # "https://www.gucci.com/us/en/c/productgrid?categoryCode=men-bags-backpacks&show=Page&page=0",
+        # "https://www.gucci.com/us/en/c/productgrid?categoryCode=women-handbags-belt&show=Page&page=0",
     ]
     # headers = {
     #     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -61,6 +64,7 @@ class GucciSpider(scrapy.Spider):
         goods_gender = response.meta["goods_gender"]
         goods_page = response.meta["goods_page"]
         goods_infos = eval(response.text.replace("true","True").replace("false","False").replace("null","None"))["products"]["items"]
+        print(len(goods_infos))
         for goods_info in goods_infos:
             goods_name = goods_info["productName"]
             goods_model = goods_info["productCode"]
