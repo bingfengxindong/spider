@@ -27,40 +27,44 @@ if not os.path.exists(path):
     os.makedirs(path)
 file = open(os.path.join(".","data",datetime.datetime.now().strftime("%Y-%m-%d"),"underarmour_zh.csv"),"w+",encoding="utf-8",newline="")
 writer = csv.writer(file)
-writer.writerow(("goods_name","goods_model","goods_price","goods_discount_price","goods_color","goods_size","goods_details","goods_images","goods_num","gender","goods_page","goods_url"))
+writer.writerow(("goods_name","goods_model","goods_price","goods_discount_price","goods_color","goods_size","goods_details","goods_images","goods_num","gender","goods_page","goods_url","goods_type"))
 
 ssl._create_default_https_context = ssl._create_stdlib_context
 #主url
 urls = [
-    # "https://www.underarmour.cn/cmens-accessories-headwear/#11|Mens|Accessories|Headwear|4-MensCategory-MensCategory",
     # "https://www.underarmour.cn/cmens-tops-longsleeve/#11|Mens|Tops|Longsleeve|2-MensCategory-MensCategory",
     # "https://www.underarmour.cn/cmens-tops-hoody/#11|Mens|Tops|Hoody|3-MensCategory-MensCategory",
     # "https://www.underarmour.cn/cmens-tops-outwear/#11|Mens|Tops|Outwear|4-MensCategory-MensCategory",
     # "https://www.underarmour.cn/cmens-tops-shortsleeve/#11|Mens|Tops|Shortsleeve|5-MensCategory-MensCategory",
     # "https://www.underarmour.cn/cmens-tops-sleeveless/#11|Mens|Tops|Sleeveless|6-MensCategory-MensCategory",
     # "https://www.underarmour.cn/cmens-tops-polo/#11|Mens|Tops|Polo|7-MensCategory-MensCategory",
-    "https://www.underarmour.cn/cmens-accessories-bag/#11|Mens|Accessories|Bag|3-MensCategory-MensCategory",
-    # "https://www.underarmour.cn/cwomens-accessories-headwear/#11|Womens|Accessories|Headwear|4-WomensCategory",
     # "https://www.underarmour.cn/cwomens-tops-longsleeve/#11|Womens|Tops|Longsleeve|2-WomensCategory",
     # "https://www.underarmour.cn/cwomens-tops-hoody/#11|Mens|Tops|Hoody|3-WomensCategory",
     # "https://www.underarmour.cn/cwomens-tops-outwear/#11|Womens|Tops|Outwear|4-WomensCategory",
     # "https://www.underarmour.cn/cwomens-tops-sportbra/#11|Womens|Tops|SportsBras|5-WomensCategory",
     # "https://www.underarmour.cn/cwomens-tops-shortsleeve/#11|Womens|Tops|Shortsleeve|6-WomensCategory",
     # "https://www.underarmour.cn/cwomens-tops-sleeveless/#11|Womens|Tops|Sleeveless|7-WomensCategory",
-    "https://www.underarmour.cn/cwomens-accessories-bag/#11|Womens|Accessories|Bag|3-WomensCategory",
+
+    ["https://www.underarmour.cn/cmens-accessories-headwear/#11|Mens|Accessories|Headwear|4-MensCategory-MensCategory","Mens","hats"],
+    ["https://www.underarmour.cn/cwomens-accessories-headwear/#11|Womens|Accessories|Headwear|4-WomensCategory","Womens","hats"],
+
+    ["https://www.underarmour.cn/cmens-accessories-bag/#11|Mens|Accessories|Bag|3-MensCategory-MensCategory","Mens","bags"],
+    ["https://www.underarmour.cn/cwomens-accessories-bag/#11|Womens|Accessories|Bag|3-WomensCategory","Womens","bags"],
 ]
 headers = {
     "user-agent":"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.87 Safari/537.36"
     }
 #产品页面编号
 goods_page = 1
-for url in urls:
+for u in urls:
     sleep_time()
+    # 性别
+    sex = u[1]
+    url = u[0]
+    goods_type = u[2]
     response = requests.get(url=url,headers=headers)
     text = response.text
     html = etree.HTML(text)
-    #性别
-    sex = url.split("/")[3].split("-")[0].strip("c").strip("s")
     #产品id
     goods_ids = html.xpath("//div[@class='good-con']/div/a/@id")
     #产品编号
@@ -133,6 +137,7 @@ for url in urls:
             goods_info["gender"],
             goods_page,
             goods_url,
+            goods_type,
         ))
         print("%s抓取完成" % goods_model)
 

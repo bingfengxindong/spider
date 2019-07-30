@@ -8,13 +8,12 @@ import random
 class HMSpider(scrapy.Spider):
     name = "hm"
     start_urls = [
-        # "https://www2.hm.com/en_us/men/products/accessories.html?product-type=men_accessories&sort=stock&productTypes=cap,hat&image-size=small&image=model&offset=0&page-size=72",
-        # "https://www2.hm.com/en_us/ladies/products/accessories.html?product-type=ladies_accessories&sort=stock&productTypes=beret,cap,hat&image-size=small&image=stillLife&offset=0&page-size=36",
-        # "https://www2.hm.com/en_us/kids/products/view-all.html?sort=stock&productTypes=cap,hat&image-size=small&image=stillLife&offset=0&page-size=252",
-
-        "https://www2.hm.com/en_us/men/products/view-all.html?sort=stock&productTypes=bag&image-size=small&image=model&offset=0&page-size=36",
-        "https://www2.hm.com/en_us/women/products/view-all.html?sort=stock&productTypes=bag&image-size=small&image=model&offset=0&page-size=36",
-        "https://www2.hm.com/en_us/kids/products/view-all.html?sort=stock&productTypes=bag&image-size=small&image=stillLife&offset=0&page-size=36",
+        ["https://www2.hm.com/en_us/men/products/accessories.html?product-type=men_accessories&sort=stock&productTypes=cap,hat&image-size=small&image=model&offset=0&page-size=72", "mens", "hats"],
+        ["https://www2.hm.com/en_us/ladies/products/accessories.html?product-type=ladies_accessories&sort=stock&productTypes=beret,cap,hat&image-size=small&image=stillLife&offset=0&page-size=36", "womens", "hats"],
+        ["https://www2.hm.com/en_us/kids/products/view-all.html?sort=stock&productTypes=cap,hat&image-size=small&image=stillLife&offset=0&page-size=252", "kids", "hats"],
+        ["https://www2.hm.com/en_us/men/products/view-all.html?sort=stock&productTypes=bag&image-size=small&image=model&offset=0&page-size=36", "mens", "bags"],
+        ["https://www2.hm.com/en_us/women/products/view-all.html?sort=stock&styles=backpack,bag&image-size=small&image=model&offset=0&page-size=36", "womens", "bags"],
+        ["https://www2.hm.com/en_us/kids/products/view-all.html?sort=stock&productTypes=bag&image-size=small&image=stillLife&offset=0&page-size=36", "kids", "bags"],
     ]
     headers = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -38,12 +37,13 @@ class HMSpider(scrapy.Spider):
 
     def start_requests(self):
         for start_url in self.start_urls:
-            goods_gender = start_url.split("/")[4]
-            if goods_gender == "ladies":
-                goods_gender = "women"
+            url = start_url[0]
+            goods_gender = start_url[1]
+            goods_type = start_url[2]
             goods_page = self.start_urls.index(start_url)
-            yield scrapy.Request(url=start_url,callback=self.num_parse,headers=self.headers,meta={"start_url":start_url,
+            yield scrapy.Request(url=url,callback=self.num_parse,headers=self.headers,meta={"start_url":url,
                                                                                                 "goods_gender":goods_gender,
+                                                                                                "goods_type":goods_type,
                                                                                                 "goods_page":goods_page,})
 
     def num_parse(self,response):
@@ -51,13 +51,16 @@ class HMSpider(scrapy.Spider):
         start_url = response.meta["start_url"]
         goods_gender = response.meta["goods_gender"]
         goods_page = response.meta["goods_page"]
+        goods_type = response.meta["goods_type"]
         url = "{}page-size={}".format(start_url.split("page-size=")[0],all_num)
         yield scrapy.Request(url=url, callback=self.parse, headers=self.headers,meta={"goods_gender": goods_gender,
-                                                                                        "goods_page": goods_page, })
+                                                                                        "goods_page": goods_page,
+                                                                                      "goods_type": goods_type, })
 
     def parse(self, response):
         goods_gender = response.meta["goods_gender"]
         goods_page = response.meta["goods_page"]
+        goods_type = response.meta["goods_type"]
         goods_urls = ["https://www2.hm.com{}".format(i) for i in response.xpath("//h3[@class='item-heading']/a/@href").extract()]
         for goods_url in goods_urls:
             self.sleep_time()
@@ -65,6 +68,7 @@ class HMSpider(scrapy.Spider):
             yield scrapy.Request(url=goods_url, callback=self.info_parse, headers=self.headers,meta={"goods_order":goods_order,
                                                                                                      "goods_gender":goods_gender,
                                                                                                      "goods_page":goods_page,
+                                                                                                     "goods_type":goods_type,
                                                                                                      "goods_url":goods_url,},dont_filter=True)
 
     def info_parse(self,response):
@@ -72,6 +76,7 @@ class HMSpider(scrapy.Spider):
         goods_gender = response.meta["goods_gender"]
         goods_page = response.meta["goods_page"]
         goods_url = response.meta["goods_url"]
+        goods_type = response.meta["goods_type"]
         goods_info = eval(response.text.split('var productArticleDetails =')[-1].split('</script><script type="text/template" id="fullscreenModalTmpl">')[0].strip().strip(";").replace("true","True").replace("false","False").replace("null","None").replace("isDesktop ?","").replace("' : '//","-----"))
         goods_name = goods_info["alternate"].split("- {alternatecolor}")[0].strip()
         goods_model = goods_info["articleCode"].strip()
@@ -101,4 +106,5 @@ class HMSpider(scrapy.Spider):
             "gender": goods_gender,
             "goods_page": goods_page,
             "goods_url": goods_url,
+            "goods_type": goods_type,
         }

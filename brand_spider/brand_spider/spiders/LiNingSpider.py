@@ -13,7 +13,6 @@ class LiNingSpider(scrapy.Spider):
     start_urls = [
         ["http://store.lining.com/shop/goodsCate-sale,desc,1,17s17_133,17_133,17_133_m-0-0-17_133,17_133,17_133_m-1,4s0-0-0-min,max-0.html","mens","hats"],
         ["http://store.lining.com/shop/goodsCate-sale,desc,1,17s17_133,17_133,17_133_m-0-0-17_133,17_133,17_133_m-2,4s0-0-0-min,max-0.html","womens","hats"],
-
         ["http://store.lining.com/shop/goodsCate-sale,desc,1,17s17_131,17_131,17_131_m-0-0-17_131,17_131,17_131_m-1,4s0-0-0-min,max-0.html","mens","bags"],
         ["http://store.lining.com/shop/goodsCate-sale,desc,1,17s17_131,17_131,17_131_m-0-0-17_131,17_131,17_131_m-2,4s0-0-0-min,max-0.html","womens","bags"],
     ]
@@ -50,15 +49,20 @@ class LiNingSpider(scrapy.Spider):
 
     def start_requests(self):
         for start_url in self.start_urls:
+            url = start_url[0]
+            goods_gender = start_url[1]
+            goods_type = start_url[2]
             goods_page = self.start_urls.index(start_url)
-            yield scrapy.Request(url=start_url[0],callback=self.parse,headers=self.random_headers(),meta={"url":start_url[0],
-                                                                                                       "goods_gender":start_url[1],
+            yield scrapy.Request(url=url,callback=self.parse,headers=self.random_headers(),meta={"url":url,
+                                                                                                       "goods_gender":goods_gender,
+                                                                                                       "goods_type":goods_type,
                                                                                                        "goods_page":goods_page,})
 
     def parse(self, response):
         url = response.meta["url"]
         goods_gender = response.meta["goods_gender"]
         goods_page = response.meta["goods_page"]
+        goods_type = response.meta["goods_type"]
         goods_infos = response.xpath("//div[@class='selItem']").extract()
         for goods_info in goods_infos:
             goods_info_html = etree.HTML(goods_info)
@@ -71,11 +75,13 @@ class LiNingSpider(scrapy.Spider):
                                                                                                                 "goods_url":goods_url,
                                                                                                                 "goods_gender":goods_gender,
                                                                                                                 "goods_page":goods_page,
+                                                                                                                "goods_type":goods_type,
                                                                                                                 "goods_order":goods_order,},dont_filter=True)
         if len(goods_infos) != 0:
             url = "{}desc,{},17s17{}".format(url.split("desc,")[0],int(url.split("desc,")[1].split(",17s17")[0]) + 1,url.split("desc,")[1].split(",17s17")[1])
             yield scrapy.Request(url=url,callback=self.parse,headers=self.random_headers(),meta={"url":url,
                                                                                                  "goods_gender":goods_gender,
+                                                                                                 "goods_type":goods_type,
                                                                                                  "goods_page":goods_page,})
 
     def info_parse(self,response):
@@ -84,6 +90,7 @@ class LiNingSpider(scrapy.Spider):
         goods_gender = response.meta["goods_gender"]
         goods_page = response.meta["goods_page"]
         goods_order = response.meta["goods_order"]
+        goods_type = response.meta["goods_type"]
         goods_model = response.xpath("//span[@id='partNumber']/span[@class='v']/text()").extract()[0]
         goods_price = response.xpath("//span[@id='offerPrice']/span[@class='v']/text()").extract()[0]
         goods_discount_price = response.xpath("//span[@id='listPrice']/span[@class='v']/text()").extract()[0]
@@ -106,4 +113,5 @@ class LiNingSpider(scrapy.Spider):
             "gender": goods_gender,
             "goods_page": goods_page,
             "goods_url": goods_url,
+            "goods_type": goods_type,
         }

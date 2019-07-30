@@ -10,13 +10,12 @@ import random
 class GucciSpider(scrapy.Spider):
     name = "gucci"
     start_urls = [
-        "https://www.gucci.com/us/en/c/productgrid?categoryCode=men-accessories-hats-and-gloves&show=Page&page=0",
-        "https://www.gucci.com/us/en/c/productgrid?categoryCode=women-accessories-hats-and-gloves&show=Page&page=0",
-        "https://www.gucci.com/us/en/c/productgrid?categoryCode=children-boys-accessories&show=Page&page=0",
-        "https://www.gucci.com/us/en/c/productgrid?categoryCode=girls-soft-accessories&show=Page&page=0",
-
-        # "https://www.gucci.com/us/en/c/productgrid?categoryCode=men-bags-backpacks&show=Page&page=0",
-        # "https://www.gucci.com/us/en/c/productgrid?categoryCode=women-handbags-belt&show=Page&page=0",
+        ["https://www.gucci.com/us/en/c/productgrid?categoryCode=men-accessories-hats-and-gloves&show=Page&page=0", "men", "hats"],
+        ["https://www.gucci.com/us/en/c/productgrid?categoryCode=women-accessories-hats-and-gloves&show=Page&page=0", "women", "hats"],
+        ["https://www.gucci.com/us/en/c/productgrid?categoryCode=children-boys-accessories&show=Page&page=0", "boys", "hats"],
+        ["https://www.gucci.com/us/en/c/productgrid?categoryCode=girls-soft-accessories&show=Page&page=0", "girls", "hats"],
+        ["https://www.gucci.com/us/en/c/productgrid?categoryCode=men-bags-backpacks&show=Page&page=0", "men", "bags"],
+        ["https://www.gucci.com/us/en/c/productgrid?categoryCode=women-handbags-belt&show=Page&page=0", "women", "bags"],
     ]
     # headers = {
     #     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -51,20 +50,21 @@ class GucciSpider(scrapy.Spider):
 
     def start_requests(self):
         for start_url in self.start_urls:
-            goods_gender = start_url.split("=")[1].split("-")[0]
-            if goods_gender == "children":
-                goods_gender = "boys"
+            url = start_url[0]
+            goods_gender = start_url[1]
+            goods_type = start_url[2]
             goods_page = self.start_urls.index(start_url)
-            yield scrapy.Request(url=start_url,callback=self.parse,headers=self.random_headers(),meta={"url":start_url,
-                                                                                                       "goods_gender":goods_gender,
-                                                                                                       "goods_page":goods_page,})
+            yield scrapy.Request(url=url,callback=self.parse,headers=self.random_headers(),meta={"url":url,
+                                                                                                   "goods_gender":goods_gender,
+                                                                                                   "goods_type":goods_type,
+                                                                                                   "goods_page":goods_page,})
 
     def parse(self, response):
         url = response.meta["url"]
         goods_gender = response.meta["goods_gender"]
         goods_page = response.meta["goods_page"]
+        goods_type = response.meta["goods_type"]
         goods_infos = eval(response.text.replace("true","True").replace("false","False").replace("null","None"))["products"]["items"]
-        print(len(goods_infos))
         for goods_info in goods_infos:
             goods_name = goods_info["productName"]
             goods_model = goods_info["productCode"]
@@ -88,11 +88,13 @@ class GucciSpider(scrapy.Spider):
                                                                                                             "goods_page":goods_page,
                                                                                                             "goods_order":goods_order,
                                                                                                             "goods_url":goods_url,
+                                                                                                            "goods_type":goods_type,
                                                                                                             },dont_filter=True)
         if len(goods_infos) != 0:
             url = "{}&page={}".format(url.split("&page=")[0],int(url.split("&page=")[-1]) + 1)
             yield scrapy.Request(url=url,callback=self.parse,headers=self.random_headers(),meta={"url":url,
                                                                                                  "goods_gender": goods_gender,
+                                                                                                 "goods_type": goods_type,
                                                                                                  "goods_page": goods_page,})
 
     def info_parse(self,response):
@@ -106,6 +108,7 @@ class GucciSpider(scrapy.Spider):
         goods_page = response.meta["goods_page"]
         goods_order = response.meta["goods_order"]
         goods_url = response.meta["goods_url"]
+        goods_type = response.meta["goods_type"]
         goods_size = self.del_report([i.replace("\n","").replace("\xa0","").replace(" ","") for i in response.xpath("//select[@name='size']/option/text()").extract() if i.replace("\n","").replace("\xa0","").replace(" ","") != "SelectSize"])
         goods_details = [i.replace("\n","").strip() for i in response.xpath("//div[@class='product-detail']/p/text()|//div[@class='product-detail']/ul/li/text()").extract()]
         print(goods_name)
@@ -123,4 +126,5 @@ class GucciSpider(scrapy.Spider):
             "gender": goods_gender,
             "goods_page": goods_page,
             "goods_url": goods_url,
+            "goods_type": goods_type,
         }

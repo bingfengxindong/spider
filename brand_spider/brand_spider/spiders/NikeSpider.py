@@ -11,11 +11,10 @@ import random
 class KithSpider(scrapy.Spider):
     name = "nike"
     start_urls = [
-        # "https://store.nike.com/cn/zh_cn/pw/mens-hats-caps/7puZof1",
-        # "https://store.nike.com/cn/zh_cn/pw/womens-hats-caps/7ptZof1",
-
-        # "https://store.nike.com/cn/zh_cn/pw/mens-bags-backpacks/7puZof2",
-        "https://store.nike.com/cn/zh_cn/pw/womens-bags-backpacks/7ptZof2",
+        ["https://store.nike.com/cn/zh_cn/pw/mens-hats-caps/7puZof1","mens","hats"],
+        ["https://store.nike.com/cn/zh_cn/pw/womens-hats-caps/7ptZof1","womens","hats"],
+        ["https://store.nike.com/cn/zh_cn/pw/mens-bags-backpacks/7puZof2","mens","bags"],
+        ["https://store.nike.com/cn/zh_cn/pw/womens-bags-backpacks/7ptZof2","womens","bags"],
     ]
     headers = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -51,15 +50,18 @@ class KithSpider(scrapy.Spider):
 
     def start_requests(self):
         for start_url in self.start_urls:
-            goods_gender = start_url.split("-")[0].split("/")[-1]
-            yield scrapy.Request(url=start_url,callback=self.parse,dont_filter=True,meta={"goods_gender":goods_gender,
-                                                                                            "goods_page":self.start_urls.index(start_url) + 1,})
+            url = start_url[0]
+            goods_gender = start_url[1]
+            goods_type = start_url[2]
+            yield scrapy.Request(url=url,callback=self.parse,dont_filter=True,meta={"goods_gender":goods_gender,
+                                                                                    "goods_type":goods_type,
+                                                                                    "goods_page":self.start_urls.index(start_url) + 1,})
 
     def parse(self, response):
         goods_gender = response.meta["goods_gender"]
         goods_page = response.meta["goods_page"]
+        goods_type = response.meta["goods_type"]
         goods_details = response.xpath("//div[@class='exp-product-wall']/div|//div[@class='exp-product-wall clearfix']/div").extract()
-        print(len(goods_details))
         for goods_detail in goods_details:
             goods_detail_html = etree.HTML(goods_detail)
             goods_price = goods_detail_html.xpath("//span[@class='local nsg-font-family--base']/text()")[0]
@@ -73,6 +75,7 @@ class KithSpider(scrapy.Spider):
                                                                                                         "goods_gender":goods_gender,
                                                                                                         "goods_page":goods_page,
                                                                                                         "goods_price":goods_price,
+                                                                                                        "goods_type":goods_type,
                                                                                                         "goods_discount_price":goods_discount_price,})
 
     def goods_info_parse(self,response):
@@ -82,6 +85,7 @@ class KithSpider(scrapy.Spider):
         goods_url = response.meta["goods_url"]
         goods_price = response.meta["goods_price"]
         goods_discount_price = response.meta["goods_discount_price"]
+        goods_type = response.meta["goods_type"]
         goods_name = response.xpath("//h1[@id='pdp_product_title']/text()").extract()[0]
         goods_details = response.xpath("//div[@class='pi-pdpmainbody']/p/b/text()|//div[@class='pi-pdpmainbody']/ul/li/text()|//div[@class='pi-pdpmainbody']/li/text()").extract()
         goods_model = [i for i in goods_details if "款式" in i][0].strip("款式：").strip()
@@ -106,4 +110,5 @@ class KithSpider(scrapy.Spider):
             "gender": goods_gender,
             "goods_page": goods_page,
             "goods_url": goods_url,
+            "goods_type": goods_type,
         }

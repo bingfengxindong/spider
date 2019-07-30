@@ -17,16 +17,16 @@ if not os.path.exists(path):
     os.makedirs(path)
 file = open(os.path.join(".","data",datetime.datetime.now().strftime("%Y-%m-%d"),"converse.csv"),"w+",encoding="utf-8",newline="")
 writer = csv.writer(file)
-writer.writerow(("goods_name","goods_model","goods_price","goods_discount_price","goods_color","goods_size","goods_details","goods_images","goods_num","gender","goods_page","goods_url"))
+writer.writerow(("goods_name","goods_model","goods_price","goods_discount_price","goods_color","goods_size","goods_details","goods_images","goods_num","gender","goods_page","goods_url","goods_type"))
 
 ssl._create_default_https_context = ssl._create_stdlib_context
 
 urls = [
-    # "https://www.converse.com.cn/men-accessories/category.htm?attributeParams=&propertyCode=cap&size=&maxprice=&minprice=&sort=showOrder&rowsNum=&isPaging=false&pageNo=1",
-    "https://www.converse.com.cn/men-accessories/category.htm?attributeParams=&propertyCode=bag&size=&maxprice=&minprice=&sort=showOrder&rowsNum=&isPaging=false&pageNo=1",
-    # "https://www.converse.com.cn/women-accessories/category.htm?attributeParams=&propertyCode=cap&size=&maxprice=&minprice=&sort=showOrder&rowsNum=&isPaging=false&pageNo=1",
-    "https://www.converse.com.cn/women-accessories/category.htm?attributeParams=&propertyCode=bag&size=&maxprice=&minprice=&sort=showOrder&rowsNum=&isPaging=false&pageNo=1",
+    ["https://www.converse.com.cn/men-accessories/category.htm?attributeParams=&propertyCode=cap&size=&maxprice=&minprice=&sort=showOrder&rowsNum=&isPaging=false&pageNo=1","men","hats"],
+    ["https://www.converse.com.cn/women-accessories/category.htm?attributeParams=&propertyCode=cap&size=&maxprice=&minprice=&sort=showOrder&rowsNum=&isPaging=false&pageNo=1", "women", "hats"],
 
+    ["https://www.converse.com.cn/men-accessories/category.htm?attributeParams=&propertyCode=bag&size=&maxprice=&minprice=&sort=showOrder&rowsNum=&isPaging=false&pageNo=1", "men", "bags"],
+    ["https://www.converse.com.cn/women-accessories/category.htm?attributeParams=&propertyCode=bag&size=&maxprice=&minprice=&sort=showOrder&rowsNum=&isPaging=false&pageNo=1","women","bags"],
 ]
 
 def sleep_time():
@@ -68,21 +68,19 @@ def goods_driver():
     driver = webdriver.Chrome(r"C:\Program Files (x86)\Google\Chrome Dev\Application\chromedriver")
     return driver
 
-def goods_info_parse(url,goods_page):
-    goods_gender = url.split("-")[0].split("/")[-1]
+def goods_info_parse(u,goods_page):
+    goods_gender = u[1]
+    goods_type = u[2]
+    url = u[0]
     html = goods_info(url)
     goods_names = html.xpath("//dd[@class='p-l-name']/a/text()")
     goods_prices = html.xpath("//dd[@class='p-l-price']/text()|//dd[@class='p-l-price linethrough']/text()")
     goods_urls = ["https://www.converse.com.cn{}".format(i) for i in html.xpath("//dd[@class='p-l-name']/a/@href")]
-    print(goods_names)
-    print(goods_prices)
-    print(goods_urls)
     for goods_url in goods_urls:
         sleep_time()
         info_html = goods_info(goods_url)
         goods_name = goods_names[goods_urls.index(goods_url)]
         goods_price = goods_prices[goods_urls.index(goods_url)]
-        print(goods_url)
         goods_model = info_html.xpath("//div[@class='product-info']/div/text()")[1].split(":")[1].strip()
         goods_color = info_html.xpath("//div[@class='product-info']/div/text()")[0].split(":")[1].strip()
         goods_sizes = ["all"]
@@ -105,11 +103,13 @@ def goods_info_parse(url,goods_page):
             goods_gender,
             goods_page,
             goods_url,
+            goods_type,
         ))
+    print(goods_type)
 
     if len(goods_urls) != 0:
         url = "{}&pageNo={}".format(url.split("&pageNo=")[0],int(url.split("&pageNo=")[-1]) + 1)
-        goods_info_parse(url,goods_page)
+        goods_info_parse([url,goods_gender,goods_type],goods_page)
 
 def main():
     for url in urls:

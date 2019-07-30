@@ -11,8 +11,10 @@ import random
 class PradaSpider(scrapy.Spider):
     name = "prada"
     start_urls = [
-        "https://www.prada.com/us/en/men/accessories/hats/_jcr_content/par/component-plp-section.1.sortBy_0.html",
-        "https://www.prada.com/us/en/women/accessories/hats/_jcr_content/par/component-plp-section.1.sortBy_0.html",
+        ["https://www.prada.com/us/en/men/accessories/hats/_jcr_content/par/component-plp-section.1.sortBy_0.html","men", "hats"],
+        ["https://www.prada.com/us/en/women/accessories/hats/_jcr_content/par/component-plp-section.1.sortBy_0.html","women", "hats"],
+        ["https://www.prada.com/us/en/men/bags/_jcr_content/par/component_section/par/component_plp_sectio.1.sortBy_0.html","men", "bags"],
+        ["https://www.prada.com/us/en/women/bags/_jcr_content/par/component_section/par/component_plp_sectio.1.sortBy_0.html","women", "bags"],
     ]
 
     def sleep_time(self):
@@ -40,16 +42,20 @@ class PradaSpider(scrapy.Spider):
 
     def start_requests(self):
         for start_url in self.start_urls:
-            goods_gender = start_url.split("/")[5]
+            url = start_url[0]
+            goods_gender = start_url[1]
+            goods_type = start_url[2]
             goods_page = self.start_urls.index(start_url) + 1
-            yield scrapy.Request(url=start_url,callback=self.parse,headers=self.random_headers(),meta={"url":start_url,
-                                                                                                       "goods_gender":goods_gender,
-                                                                                                       "goods_page":goods_page,})
+            yield scrapy.Request(url=url,callback=self.parse,headers=self.random_headers(),meta={"url":url,
+                                                                                                   "goods_gender":goods_gender,
+                                                                                                   "goods_type":goods_type,
+                                                                                                   "goods_page":goods_page,})
 
     def parse(self, response):
         url = response.meta["url"]
         goods_gender = response.meta["goods_gender"]
         goods_page = response.meta["goods_page"]
+        goods_type = response.meta["goods_type"]
         goods_urls = response.xpath("//a[@class='product-link d-inline-block mx-1 mx-md-auto']/@href").extract()
         for goods_url in goods_urls:
             goods_json_url = "https://www.prada.com/us/en/{}/accessories/hats/products.glb.getProductsByPartNumbers.json?partNumbers={}".format(goods_gender,goods_url.split(".")[2])
@@ -57,10 +63,12 @@ class PradaSpider(scrapy.Spider):
             yield scrapy.Request(url=goods_json_url,callback=self.info_json_parse,headers=self.random_headers(),meta={"goods_order":goods_order,
                                                                                                                  "goods_gender":goods_gender,
                                                                                                                  "goods_page":goods_page,
+                                                                                                                 "goods_type":goods_type,
                                                                                                                  "goods_url":"https://www.prada.com{}".format(goods_url),})
         url = "{}.{}.{}.{}.{}.{}".format(url.split(".")[0],url.split(".")[1],url.split(".")[2],int(url.split(".")[3]) + 1,url.split(".")[4],url.split(".")[5])
         yield scrapy.Request(url=url,callback=self.parse,headers=self.random_headers(),meta={"url":url,
                                                                                              "goods_gender":goods_gender,
+                                                                                             "goods_type":goods_type,
                                                                                              "goods_page":goods_page,})
 
     def info_json_parse(self,response):
@@ -68,6 +76,7 @@ class PradaSpider(scrapy.Spider):
         goods_gender = response.meta["goods_gender"]
         goods_page = response.meta["goods_page"]
         goods_url = response.meta["goods_url"]
+        goods_type = response.meta["goods_type"]
         goods_info = eval(response.text.replace("true","True").replace("false","False"))["response"]["catalogEntryView"][0]
         goods_name = goods_info["name"]
         goods_model = goods_info["mfPartNumber_ntk"]
@@ -94,4 +103,5 @@ class PradaSpider(scrapy.Spider):
             "gender": goods_gender,
             "goods_page": goods_page,
             "goods_url": goods_url,
+            "goods_type": goods_type,
         }

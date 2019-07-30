@@ -26,7 +26,7 @@ if not os.path.exists(path):
     os.makedirs(path)
 file = open(os.path.join(".","data",datetime.datetime.now().strftime("%Y-%m-%d"),"stussy.csv"),"w+",encoding="utf-8",newline="")
 writer = csv.writer(file)
-writer.writerow(("goods_name","goods_model","goods_price","goods_discount_price","goods_color","goods_size","goods_details","goods_images","goods_num","gender","goods_page","goods_url"))
+writer.writerow(("goods_name","goods_model","goods_price","goods_discount_price","goods_color","goods_size","goods_details","goods_images","goods_num","gender","goods_page","goods_url","goods_type"))
 
 ssl._create_default_https_context = ssl._create_stdlib_context
 #主url
@@ -41,8 +41,10 @@ urls = [
     # "https://www.stussy.com/us/womens/hoodies-sweaters",
     # "https://www.stussy.com/us/womens/jackets",
     # "https://www.stussy.com/us/womens/dresses",
-    # "https://www.stussy.com/us/accessories/hats-beanies",
-    "https://www.stussy.com/us/accessories/bags-backpacks",
+
+    ["https://www.stussy.com/us/accessories/hats-beanies","all","hats"],
+
+    ["https://www.stussy.com/us/accessories/bags-backpacks", "all", "bags"],
 ]
 headers = {
     "user-agent":"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.87 Safari/537.36"
@@ -61,17 +63,16 @@ def detail_driver(goods_url):
         html_detail = detail_driver(goods_url)
     return html_detail
 
-for url in urls:
+for u in urls:
+    gender = u[1]
+    goods_type = u[2]
+    url = u[0]
     response = requests.get(url=url,headers=headers)
     text = response.text
     html = etree.HTML(text)
     headers_detail = headers
     headers_detail["referer"] = url
-    # 适合人群
-    gender = url.split("us/")[-1].split("/")[0]
-    if gender == "accessories":
-        gender = "all"
-    goods_page = urls.index(url) + 1
+    goods_page = urls.index(u) + 1
     #爬去每个帽子详情的url
     goods_urls = html.xpath("//ul[@class='product-swatch-information']/li[1]/a/@href")
 
@@ -153,5 +154,6 @@ for url in urls:
                 goods_info["gender"],
                 goods_page,
                 goods_url,
+                goods_type,
             ))
             print("%s抓取完成" % goods_name)

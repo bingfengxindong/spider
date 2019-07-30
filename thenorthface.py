@@ -17,7 +17,7 @@ if not os.path.exists(path):
     os.makedirs(path)
 file = open(os.path.join(".","data",datetime.datetime.now().strftime("%Y-%m-%d"),"thenorthface.csv"),"w+",encoding="utf-8",newline="")
 writer = csv.writer(file)
-writer.writerow(("goods_name","goods_model","goods_price","goods_discount_price","goods_color","goods_size","goods_details","goods_images","goods_title","goods_num","gender","goods_page","goods_comments","goods_url"))
+writer.writerow(("goods_name","goods_model","goods_price","goods_discount_price","goods_color","goods_size","goods_details","goods_images","goods_num","gender","goods_page","goods_url","goods_type"))
 
 ssl._create_default_https_context = ssl._create_stdlib_context
 
@@ -26,6 +26,11 @@ urls = [
     ["https://www.thenorthface.com/shop/womens-accessories-caps","womens","hats"],
     ["https://www.thenorthface.com/shop/kids-girls-accessories","girls","hats"],
     ["https://www.thenorthface.com/shop/kids-boys-accessories","boys","hats"],
+
+    ["https://www.thenorthface.com/shop/equipment-backpacks-mens-backpacks","mens","bags"],
+    ["https://www.thenorthface.com/shop/equipment-backpacks-womens-backpacks","womens","bags"],
+    ["https://www.thenorthface.com/shop/kids-girls-backpacks","girls","bags"],
+    ["https://www.thenorthface.com/shop/kids-boys-backpacks","boys","bags"],
 ]
 
 
@@ -90,9 +95,10 @@ def goods_comment(url):
 
 goods_imgs = lambda x:[x["i"]["n"]] if isinstance(x,dict) else [i["i"]["n"] for i in x]
 
-def url_parse(url,goods_page):
-    gender = url[1]
-    url = url[0]
+def url_parse(u,goods_page):
+    gender = u[1]
+    g_type = u[2]
+    url = u[0]
     driver = goods_driver()
     sleep_time()
     driver.get(url)
@@ -108,7 +114,6 @@ def url_parse(url,goods_page):
         else:
             break
     goods_type_infos = goods_parse(driver).xpath("//div[@class='product-block product-block-js lanes']")
-    print(len(goods_type_infos))
     for goods_type_info in goods_type_infos:
         goods_type_info_html = etree.HTML(etree.tostring(goods_type_info,encoding="utf-8").decode("utf-8"))
         goods_url = goods_type_info_html.xpath("//a[@class='product-block-name-link']/@href")[0]
@@ -123,47 +128,48 @@ def url_parse(url,goods_page):
         goods_details = [i.replace("\n","").replace("\t","") for i in goods_type_info_html.xpath("//div[@class='product-addl-info-details']/text()|//div[@class='product-addl-info-FEATURE']/ul/li/text()|//div[@class='product-addl-info-SPEC']/ul/li/text()")]
         goods_order = goods_type_infos.index(goods_type_info) + 1
         for goods_type in goods_types:
-            goods_model = goods_models[goods_types.index(goods_type)]
-            goods_color = goods_colors[goods_types.index(goods_type)]
-            g_url = "{}?variationId={}".format(goods_url.split("?")[0],goods_type)
-            goods_html = goods_info(g_url)
-            goods_sizes = goods_html.xpath("//div[@class='product-content-form-attr-container attr-container attr-container-js swatches ']/button/@data-attribute-value")
-
-            goods_image_json_response = requests.get(url="https://images.thenorthface.com/is/image/TheNorthFace/{}_IS?req=set,json,UTF-8&labelkey=label&handler=s7sdkJSONResponse".format(goods_models[goods_types.index(goods_type)]))
-            print(goods_image_json_response)
-            goods_image_json = eval(goods_image_json_response.text.replace("/*jsonp*/s7sdkJSONResponse(","").replace(',"");',""))
-            print(goods_imgs(goods_image_json["set"]["item"]))
-            goods_images = ["https://images.thenorthface.com/is/image/{}?fit=constrain,1&wid=1080&hei=1080&fmt=jpg&$VFDP-VIEWER-THUMBNAIL$".format(i) for i in goods_imgs(goods_image_json["set"]["item"])]
-
-            goods_comments = []
             try:
-                goods_comment_url = "https://display.powerreviews.com/m/957729/l/en_US/product/{}/reviews?paging.from=0&paging.size=10&filters=&search=&sort=Newest&image_only=false&apikey=dc148023-20d1-4554-864d-fec4a6902345".format(goods_model.split("_")[0])
-                while True:
-                    g_comments = goods_comment(goods_comment_url)
-                    goods_comments += g_comments
-                    goods_comment_url = "{}?paging.from={}&paging.size=10&filters=&search=&sort=Newest&image_only=false&apikey=dc148023-20d1-4554-864d-fec4a6902345".format(goods_comment_url.split("?paging.from=")[0], int(goods_comment_url.split("?paging.from=")[-1].split("&")[0]) + 10)
-                    if len(g_comments) == 0:
-                        break
-            except:
-                pass
-            print(goods_name)
+                goods_model = goods_models[goods_types.index(goods_type)]
+                goods_color = goods_colors[goods_types.index(goods_type)]
+                g_url = "{}?variationId={}".format(goods_url.split("?")[0],goods_type)
+                goods_html = goods_info(g_url)
+                goods_sizes = goods_html.xpath("//div[@class='product-content-form-attr-container attr-container attr-container-js swatches ']/button/@data-attribute-value")
 
-            writer.writerow((
-                goods_name,
-                goods_model,
-                goods_price,
-                goods_discount_price,
-                goods_color,
-                goods_sizes,
-                goods_details,
-                goods_images,
-                "",
-                goods_order,
-                gender,
-                goods_page,
-                goods_comments,
-                g_url,
-            ))
+                goods_image_json_response = requests.get(url="https://images.thenorthface.com/is/image/TheNorthFace/{}_IS?req=set,json,UTF-8&labelkey=label&handler=s7sdkJSONResponse".format(goods_models[goods_types.index(goods_type)]))
+                goods_image_json = eval(goods_image_json_response.text.replace("/*jsonp*/s7sdkJSONResponse(","").replace(',"");',""))
+                goods_images = ["https://images.thenorthface.com/is/image/{}?fit=constrain,1&wid=1080&hei=1080&fmt=jpg&$VFDP-VIEWER-THUMBNAIL$".format(i) for i in goods_imgs(goods_image_json["set"]["item"])]
+
+                # goods_comments = []
+                # try:
+                #     goods_comment_url = "https://display.powerreviews.com/m/957729/l/en_US/product/{}/reviews?paging.from=0&paging.size=10&filters=&search=&sort=Newest&image_only=false&apikey=dc148023-20d1-4554-864d-fec4a6902345".format(goods_model.split("_")[0])
+                #     while True:
+                #         g_comments = goods_comment(goods_comment_url)
+                #         goods_comments += g_comments
+                #         goods_comment_url = "{}?paging.from={}&paging.size=10&filters=&search=&sort=Newest&image_only=false&apikey=dc148023-20d1-4554-864d-fec4a6902345".format(goods_comment_url.split("?paging.from=")[0], int(goods_comment_url.split("?paging.from=")[-1].split("&")[0]) + 10)
+                #         if len(g_comments) == 0:
+                #             break
+                # except:
+                #     pass
+                print(goods_name,len(goods_type_infos),goods_type_infos.index(goods_type_info) + 1,len(goods_types),goods_types.index(goods_type) + 1)
+
+                writer.writerow((
+                    goods_name,
+                    goods_model,
+                    goods_price,
+                    goods_discount_price,
+                    goods_color,
+                    goods_sizes,
+                    goods_details,
+                    goods_images,
+                    goods_order,
+                    gender,
+                    goods_page,
+                    # goods_comments,
+                    g_url,
+                    g_type,
+                ))
+            except:
+                continue
     driver.close()
 
 def main():

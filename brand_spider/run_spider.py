@@ -3,6 +3,7 @@ import datetime
 import sys
 
 # gucci prada kenzo
+#newlook herschel
 spider_name = [
                 "newlook",
                 "herschel",
@@ -16,14 +17,14 @@ def main():
     args = sys.argv[-1]
     if args == "-h" or args == "-help":
         print("Can choose the spider:"
-              "\n                     newlook"
+              "\n                     newlook(zh)"
               "\n                     herschel"
               "\n                     kith"
-              "\n                     nike"
+              "\n                     nike(zh)"
               "\n                     zara"
               "\n                     hm"
               "\n                     gucci"
-              "\n                     lining"
+              "\n                     lining(zh)"
               "\n                     prada"
               "\n                     kenzo"
               )

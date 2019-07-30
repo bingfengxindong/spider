@@ -7,18 +7,17 @@ import uuid
 class ZaraSpider(scrapy.Spider):
     name = "zara"
     start_urls = [
-        # "https://www.zara.com/ww/en/man-accessories-hats-caps-l546.html?v1=1181304",
-        # "https://www.zara.com/ww/en/woman-accessories-headwear-l1013.html?v1=1180390",
-        # "https://www.zara.com/ww/en/kids-girl-accessories-headwear-l332.html?v1=1211513",
-        # "https://www.zara.com/ww/en/kids-boy-accessories-hats-l183.html?v1=1211017",
-        # "https://www.zara.com/ww/en/kids-babygirl-accessories-headwear-l92.html?v1=1211514",
-        # "https://www.zara.com/ww/en/kids-babyboy-accessories-hats-l9.html?v1=1211515",
-
-        "https://www.zara.com/ww/en/man-bags-l563.html?v1=1282725",
-        "https://www.zara.com/ww/en/woman-bags-l1024.html?v1=1281538",
-        "https://www.zara.com/ww/en/kids-girl-bags-l346.html?v1=1282218",
-        "https://www.zara.com/ww/en/kids-boy-backpacks-l197.html?v1=1283336",
-        "https://www.zara.com/ww/en/kids-babygirl-bags-l100.html?v1=1283579",
+        ["https://www.zara.com/ww/en/man-accessories-hats-caps-l546.html?v1=1181304", "man", "hats"],
+        ["https://www.zara.com/ww/en/woman-accessories-headwear-l1013.html?v1=1180390", "woman", "hats"],
+        ["https://www.zara.com/ww/en/kids-girl-accessories-headwear-l332.html?v1=1211513", "girl", "hats"],
+        ["https://www.zara.com/ww/en/kids-boy-accessories-hats-l183.html?v1=1211017", "boy", "hats"],
+        ["https://www.zara.com/ww/en/kids-babygirl-accessories-headwear-l92.html?v1=1211514", "babygirl", "hats"],
+        ["https://www.zara.com/ww/en/kids-babyboy-accessories-hats-l9.html?v1=1211515", "babyboy", "hats"],
+        ["https://www.zara.com/ww/en/man-bags-l563.html?v1=1282725", "man", "bags"],
+        ["https://www.zara.com/ww/en/woman-bags-l1024.html?v1=1281538", "woman", "bags"],
+        ["https://www.zara.com/ww/en/kids-girl-bags-l346.html?v1=1282218", "girl", "bags"],
+        ["https://www.zara.com/ww/en/kids-boy-backpacks-l197.html?v1=1283336", "boy", "bags"],
+        ["https://www.zara.com/ww/en/kids-babygirl-bags-l100.html?v1=1283579", "babygirl", "bags"],
     ]
     headers = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -29,19 +28,22 @@ class ZaraSpider(scrapy.Spider):
     }
     def start_requests(self):
         for start_url in self.start_urls:
-            goods_gender = start_url.split("/")[-1].split("-")[0]
-            if goods_gender == "kids":
-                goods_gender = start_url.split("/")[-1].split("-")[1]
-            yield scrapy.Request(url=start_url,callback=self.parse,headers=self.headers,meta={"goods_gender":goods_gender,
-                                                                                              "goods_page":self.start_urls.index(start_url) + 1,})
+            url = start_url[0]
+            goods_gender = start_url[1]
+            goods_type = start_url[2]
+            yield scrapy.Request(url=url,callback=self.parse,headers=self.headers,meta={"goods_gender":goods_gender,
+                                                                                        "goods_type":goods_type,
+                                                                                          "goods_page":self.start_urls.index(start_url) + 1,})
 
     def parse(self, response):
         goods_gender = response.meta["goods_gender"]
         goods_page = response.meta["goods_page"]
+        goods_type = response.meta["goods_type"]
         goods_urls = response.xpath("//a[@class='area']/@href|//a[@class='name _item']/@href|//a[@class='name _item ']/@href").extract()
         for goods_url in goods_urls:
             yield scrapy.Request(url=goods_url, callback=self.info_parse, headers=self.headers,meta={"goods_url":goods_url,
                                                                                                      "goods_gender":goods_gender,
+                                                                                                     "goods_type":goods_type,
                                                                                                      "goods_order":goods_urls.index(goods_url) + 1,
                                                                                                      "goods_page":goods_page,},dont_filter=True)
 
@@ -50,6 +52,7 @@ class ZaraSpider(scrapy.Spider):
         goods_gender = response.meta["goods_gender"]
         goods_order = response.meta["goods_order"]
         goods_page = response.meta["goods_page"]
+        goods_type = response.meta["goods_type"]
         goods_name = response.xpath("//h1[@class='product-name']/text()").extract()
         if len(goods_name) == 0:
             goods_name = ["{}{}hat".format(goods_gender,str(uuid.uuid1()))]
@@ -76,4 +79,5 @@ class ZaraSpider(scrapy.Spider):
             "gender": goods_gender,
             "goods_page": goods_page,
             "goods_url": goods_url,
+            "goods_type": goods_type,
         }

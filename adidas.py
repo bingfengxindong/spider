@@ -158,10 +158,10 @@ def exit_ten(driver,urls_len,url,u_len,goods_gender,goods_page,goods_type):
 
 urls_lens = lambda x:0 if x == "" else int(x)
 
-def url_parse(url,goods_page,u_len=0):
-    goods_gender = url[1]
-    goods_type = url[2]
-    url = url[0]
+def url_parse(u,goods_page,u_len=0):
+    goods_gender = u[1]
+    goods_type = u[2]
+    url = u[0]
     driver = webdriver.Chrome(r"C:\Program Files (x86)\Google\Chrome Dev\Application\chromedriver")
     driver.maximize_window()
     sleep_time()

@@ -5,9 +5,9 @@ import scrapy
 class HerschelSpider(scrapy.Spider):
     name = "herschel"
     start_urls = [
-        # "https://herschel.com/shop/mens/headwear",
-        # "https://herschel.com/shop/womens/headwear",
-        "https://herschel.com/shop/kids/headwear",
+        ["https://herschel.com/shop/mens/headwear","mens","hats"],
+        ["https://herschel.com/shop/womens/headwear","womens","hats"],
+        ["https://herschel.com/shop/kids/headwear","kids","hats"],
     ]
     headers = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -23,15 +23,18 @@ class HerschelSpider(scrapy.Spider):
 
     def start_requests(self):
         for start_url in self.start_urls:
-            goods_gender = start_url.split("/")[-2]
+            goods_gender = start_url[1]
+            goods_type = start_url[2]
             goods_page = self.start_urls.index(start_url) + 1
-            yield scrapy.Request(url=start_url,callback=self.parse,headers=self.headers,meta={"goods_gender":goods_gender,
+            yield scrapy.Request(url=start_url[0],callback=self.parse,headers=self.headers,meta={"goods_gender":goods_gender,
                                                                                                "goods_page":goods_page,
+                                                                                               "goods_type":goods_type,
                                                                                               },dont_filter=True)
 
     def parse(self, response):
         goods_gender = response.meta["goods_gender"]
         goods_page = response.meta["goods_page"]
+        goods_type = response.meta["goods_type"]
         g_urls = response.xpath("//a[@class='js-product-grid-link']/@href").extract()
         goods_price_infos = response.xpath("//div[@class='col-xs-6 text-right']").extract()
         for g_url in g_urls:
@@ -50,6 +53,7 @@ class HerschelSpider(scrapy.Spider):
                                                                                                                                      "goods_gender": goods_gender,
                                                                                                                                      "goods_page": goods_page,
                                                                                                                                      "goods_order": goods_order,
+                                                                                                                                     "goods_type": goods_type,
                                                                                                                                      })
             else:
                 yield scrapy.Request(url="https://herschel.com%s"%g_url,callback=self.goods_url_parse,headers=self.headers,meta={"g_url":g_url,
@@ -58,6 +62,7 @@ class HerschelSpider(scrapy.Spider):
                                                                                                                                       "goods_gender":goods_gender,
                                                                                                                                       "goods_page":goods_page,
                                                                                                                                       "goods_order":goods_order,
+                                                                                                                                      "goods_type":goods_type,
                                                                                                                                       },dont_filter=True)
 
     def goods_url_parse(self,response):
@@ -67,6 +72,7 @@ class HerschelSpider(scrapy.Spider):
         goods_gender = response.meta["goods_gender"]
         goods_page = response.meta["goods_page"]
         goods_order = response.meta["goods_order"]
+        goods_type = response.meta["goods_type"]
         g_name = g_url.split("/")[-1].split("?")[0]
         goods_models = set(response.xpath("//li[@class='colors-list__color']/label/@id|//li[@class='colors-list__color on']/label/@id|//li[@class='colors-list__color colors-list__desktopandmobile']/label/@id|//li[@class='colors-list__color colors-list__desktopandmobile on']/label/@id").extract())
         for goods_model in goods_models:
@@ -79,6 +85,7 @@ class HerschelSpider(scrapy.Spider):
                                                                                                        "goods_gender": goods_gender,
                                                                                                        "goods_page": goods_page,
                                                                                                        "goods_order": goods_order,
+                                                                                                       "goods_type": goods_type,
                                                                                                        })
             else:
                 yield scrapy.Request(url=goods_url,callback=self.info_parse,headers=self.headers,meta={"goods_model":goods_model,
@@ -88,6 +95,7 @@ class HerschelSpider(scrapy.Spider):
                                                                                                         "goods_gender": goods_gender,
                                                                                                         "goods_page": goods_page,
                                                                                                         "goods_order": goods_order,
+                                                                                                        "goods_type": goods_type,
                                                                                                        },dont_filter=True)
 
     def info_parse(self,response):
@@ -108,6 +116,7 @@ class HerschelSpider(scrapy.Spider):
         goods_gender = response.meta["goods_gender"]
         goods_page = response.meta["goods_page"]
         goods_order = response.meta["goods_order"]
+        goods_type = response.meta["goods_type"]
         print(goods_name)
 
         yield {
@@ -123,4 +132,5 @@ class HerschelSpider(scrapy.Spider):
             "gender": goods_gender,
             "goods_page": goods_page,
             "goods_url": goods_url,
+            "goods_type": goods_type,
         }
